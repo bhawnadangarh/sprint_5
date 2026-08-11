@@ -2,12 +2,11 @@
 
 <img width="400" height="300" alt="image" src="https://github.com/user-attachments/assets/af59fcbc-093a-49bd-a599-baabd6bb2c3d" />
 
-
 ## Document Details
 
-| Author | Created | Version | Last Updated By | Last Edited On | L0 Reviewer | L1 Reviewer | L2 Reviewer |
-|--------|---------|---------|-----------------|----------------|-------------|-------------|-------------|
-| Bhawna Dangarh | 2026-08-11 | 1.0 | Bhawna Dangarh | 2026-08-11 | Sharvari Khamkar / Tina Bhatnagar | Aman Raj | Abhishek Dubey |
+| Author         | Created    | Version | Last Updated By | Last Edited On | L0 Reviewer                       | L1 Reviewer | L2 Reviewer    |
+| -------------- | ---------- | ------- | --------------- | -------------- | --------------------------------- | ----------- | -------------- |
+| Bhawna Dangarh | 2026-08-11 | 1.0     | Bhawna Dangarh  | 2026-08-11     | Sharvari Khamkar / Tina Bhatnagar | Aman Raj    | Abhishek Dubey |
 
 ---
 
@@ -25,81 +24,96 @@
 
 # 1. Introduction
 
-When designing Continuous Delivery (CD) pipelines, choosing the right infrastructure model is crucial:
+Choosing the right infrastructure approach is important when designing Continuous Delivery (CD) pipelines.
 
-- **Mutable Infrastructure**: Servers are modified in-place after initial provisioning. Software updates, configuration changes, and security patches are applied directly to the running server.
-- **Immutable Infrastructure**: Servers are never modified after creation. If a configuration or software update is required, new servers are spun up from a base image (e.g., AMI or Docker image) containing the new version, and the old servers are decommissioned.
+* **Mutable Infrastructure**: Servers are changed after they are created. Software updates, configuration changes, and security patches are applied directly to the existing server.
+* **Immutable Infrastructure**: Servers are not changed after they are created. When an update is needed, a new server is created with the updated image, and the old server is removed.
 
 ---
 
 # 2. Key Differences
 
-Here is a side-by-side comparison highlighting the differences between the two paradigms:
+The following table shows the main differences between mutable and immutable infrastructure:
 
-| Feature | Mutable Infrastructure | Immutable Infrastructure |
-| :--- | :--- | :--- |
-| **Modification Approach** | In-place updates (servers modified active). | Replace and provision new instances. |
-| **Configuration Drift** | **High**: Differences between servers occur over time due to manual tweaks or updates failing on some nodes. | **Zero**: Servers are exact copies of the validated base image. |
-| **Rollback Process** | **Slow & Risk-Prone**: Requires undoing changes or applying reverse patches in-place. | **Fast & Safe**: Shift traffic back to the old healthy instances. |
-| **Testing Confidence** | **Moderate**: Differences between Staging and Production servers can cause unexpected deployment bugs. | **High**: The exact same image artifact is tested and promoted to production. |
-| **Typical Tools** | Ansible, Chef, Puppet, SSH scripts. | Packer, Terraform, Docker, Kubernetes. |
-| **State Retention** | Easy to keep state on servers (not recommended for scaling). | Requires externalizing state (databases, S3, external storage). |
+| Feature                   | Mutable Infrastructure                                                                        | Immutable Infrastructure                                                      |
+| :------------------------ | :-------------------------------------------------------------------------------------------- | :---------------------------------------------------------------------------- |
+| **Modification Approach** | Changes are made directly on existing servers.                                                | New servers are created with the required changes.                            |
+| **Configuration Drift**   | **High**: Servers can become different over time because of manual changes or failed updates. | **Low/None**: Servers are created from the same tested image.                 |
+| **Rollback Process**      | **Slow & Risky**: Previous changes need to be reversed manually.                              | **Fast & Safe**: Traffic can be moved back to the previous working version.   |
+| **Testing Confidence**    | **Moderate**: Staging and production servers may have different configurations.               | **High**: The same image is tested and then used in production.               |
+| **Typical Tools**         | Ansible, Chef, Puppet, SSH scripts.                                                           | Packer, Terraform, Docker, Kubernetes.                                        |
+| **State Retention**       | Server state can be stored locally, but this is not ideal for scaling.                        | State is stored outside the server, such as in databases or external storage. |
 
 ---
 
 # 3. Pros & Cons Comparison
 
 ### Mutable Infrastructure
-* **Pros**:
-  * Quick, minor changes do not require rebuilding entire virtual machines/images.
-  * Low initial pipeline complexity (no image baking pipeline needed).
-  * Direct server debug is simpler in early development stages.
-* **Cons**:
-  * Hard to replicate configuration state exactly across scaling events.
-  * Tracking server configurations over time becomes extremely difficult (configuration drift).
-  * In-place rollbacks can fail, leaving the server in an unstable mixed state.
+
+**Pros:**
+
+* Small changes can be made quickly without creating a new image.
+* Initial pipeline setup is simple because image building is not required.
+* Troubleshooting directly on the server is easy during development.
+
+**Cons:**
+
+* It is difficult to keep all servers exactly the same.
+* Configuration drift can happen over time.
+* Rollbacks can be difficult and may leave the server in an unstable state.
 
 ### Immutable Infrastructure
-* **Pros**:
-  * Avoids configuration drift completely.
-  * Trivial scaling; auto-scaling groups can launch identical copies instantly.
-  * Instant rollback to the previous image version in case of production issues.
-  * Hardened security since servers can be locked down with no shell write access.
-* **Cons**:
-  * Re-building and baking images (e.g., using Packer) adds build time to pipelines.
-  * Requires strict externalization of state (e.g., central databases, Redis).
-  * Requires a more advanced DevOps toolchain (Packer, S3 storage, IAC orchestrators).
+
+**Pros:**
+
+* Helps prevent configuration drift.
+* Scaling is easy because new servers use the same image.
+* Rollback is quick because the previous image can be used.
+* Provides better security because servers can be restricted from direct changes.
+
+**Cons:**
+
+* Building a new image can add extra time to the pipeline.
+* Application state must be stored outside the server.
+* It requires more DevOps tools and processes such as Packer, Terraform, and external storage.
 
 ---
 
 # 4. Recommended Use Cases
 
-The choice between mutable and immutable infrastructure depends on project scale, architecture, and team experience:
+The right approach depends on the application, architecture, and project requirements.
 
-| Recommended Strategy | Scenario & Criteria | Examples |
-| :--- | :--- | :--- |
-| **Immutable Infrastructure** *(Recommended)* | - Stateless microservices (e.g., API servers, frontend apps).<br>- High-scale systems using Auto Scaling Groups (ASG).<br>- Environments requiring strict security and audit compliance.<br>- Containerized apps (Docker/Kubernetes). | React Frontends, Salary/Attendance APIs. |
-| **Mutable Infrastructure** | - Legacy applications with hardcoded local file system state.<br>- Large, stateful databases where data migration costs are high.<br>- Small-scale systems with low update frequency. | Core PostgreSQL/ScyllaDB cluster nodes (often managed via Ansible roles). |
+| Recommended Strategy                         | Scenario & Criteria                                                                                                                                                                                             | Examples                                                  |
+| :------------------------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :-------------------------------------------------------- |
+| **Immutable Infrastructure** *(Recommended)* | - Stateless applications such as APIs and frontend apps.<br>- Applications using Auto Scaling Groups (ASG).<br>- Systems that need better security and auditing.<br>- Docker and Kubernetes based applications. | React Frontends, Salary API, Attendance API               |
+| **Mutable Infrastructure**                   | - Legacy applications that depend on local server files.<br>- Large stateful databases where moving data is difficult.<br>- Small systems with fewer updates.                                                   | PostgreSQL / ScyllaDB cluster nodes managed using Ansible |
 
 ---
 
 # 5. Conclusion
 
-Immutable infrastructure represents the modern standard for cloud-native deployment due to its predictability, reliability, and ease of rollback. However, stateful middleware and databases may still utilize mutable patterns (like Ansible playbooks) for performance and storage retention.
+**Immutable Infrastructure is recommended for most modern cloud and application deployments** because it provides predictable deployments, reduces configuration drift, and makes rollback easier.
+
+However, **mutable infrastructure can still be useful for stateful systems**, such as databases, where data and storage need to remain on the same servers.
+
+A practical approach is to use:
+
+* **Immutable Infrastructure** for application and frontend servers.
+* **Mutable Infrastructure** where required for stateful systems and database management.
 
 ---
 
 # 6. Contact Information
 
-| Name | Email |
-|------|-------|------|
-| Bhawna Dangarh | bhawna.dangarh.snaatak@mygurukulam.co |
+| Name           | Email                                                                                 |
+| -------------- | ------------------------------------------------------------------------------------- |
+| Bhawna Dangarh | [bhawna.dangarh.snaatak@mygurukulam.co](mailto:bhawna.dangarh.snaatak@mygurukulam.co) |
 
 ---
 
 # 7. References
 
-| Source | Description |
-|--------|-------------|
+| Source                             | Description                                                          |
+| ---------------------------------- | -------------------------------------------------------------------- |
 | HashiCorp Immutable Infrastructure | https://www.hashicorp.com/resources/what-is-immutable-infrastructure |
-| Martin Fowler - Phoenix Servers | https://martinfowler.com/bliki/PhoenixServer.html |
+| Martin Fowler - Phoenix Servers    | https://martinfowler.com/bliki/PhoenixServer.html                    |
