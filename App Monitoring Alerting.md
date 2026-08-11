@@ -1,4 +1,7 @@
-# App Monitoring Alerting Rules & Process | Documentation
+# App Monitoring Alerting Rules & Process
+
+<img width="400" height="300" alt="image" src="https://github.com/user-attachments/assets/41fba51d-fe7e-4506-9ae3-0c3ac26c8dab" />
+
 
 ## Document Details
 
