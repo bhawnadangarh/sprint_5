@@ -1,37 +1,75 @@
-# Rolling Deployment Strategy | Documentation
+# Deployment Strategies
 
-## Document Details
+<img width="1536" height="1024" alt="image" src="https://github.com/user-attachments/assets/46d4f85f-d826-4167-9b4e-cbfcb4d5e438" />
+
+---
+
+## Author Information
 
 | Author | Created | Version | Last Updated By | Last Edited On | L0 Reviewer | L1 Reviewer | L2 Reviewer |
-|--------|---------|---------|-----------------|----------------|-------------|-------------|-------------|
-| Bhawna Dangarh | 2026-08-11 | 1.0 | Bhawna Dangarh | 2026-08-11 | Sharvari Khamkar / Tina Bhatnagar | Aman Raj | Abhishek Dubey |
+|---|---|---|---|---|---|---|---|
+| Bhawna Dangarh | 2026-08-11 | 1.3 | Bhawna Dangarh | 2026-08-11 | Sharvari Khamkar / Tina Bhatnagar | Aman Raj | Abhishek Dubey |
 
 ---
 
-# Table of Contents
+## Table of Contents
 
 1. [Introduction](#1-introduction)
-2. [How It Works (Workflow & Steps)](#2-how-it-works-workflow-steps)
-3. [Benefits](#3-benefits)
-4. [Risks & Mitigations](#4-risks-mitigations)
-5. [Suitable Use Cases](#5-suitable-use-cases)
-6. [Conclusion](#6-conclusion)
-7. [Contact Information](#7-contact-information)
-8. [References](#8-references)
+2. [Objective](#2-objective)
+3. [Deployment Strategies Explained](#3-deployment-strategies-explained)  
+   3.1 [Recreate Deployment](#31-recreate-deployment)  
+   3.2 [Blue-Green Deployment](#32-blue-green-deployment)  
+   3.3 [Canary Deployment](#33-canary-deployment)  
+   3.4 [Shadow (A/B) Deployment](#34-shadow-ab-deployment)  
+4. [Rolling Deployment – Detailed Strategy](#4-rolling-deployment-–-detailed-strategy)  
+   4.1 [Rolling Deployment Flowchart](#41-rolling-deployment-flowchart)  
+   4.2 [How It Works (Workflow & Steps)](#42-how-it-works-workflow--steps)  
+   4.3 [Benefits](#43-benefits)  
+   4.4 [Risks & Mitigations](#44-risks--mitigations)  
+   4.5 [Suitable Use Cases](#45-suitable-use-cases)  
+5. [Frequently Asked Questions (FAQs)](#5-frequently-asked-questions-faqs)
+6. [Contact Information](#6-contact-information)
+7. [References](#7-references)
 
 ---
 
-# 1. Introduction
+## 1. Introduction
 
-A **Rolling Deployment** is a deployment strategy where an application's running instances are gradually replaced with a newer version. During a rolling update, the system scales up new instances running the updated version while simultaneously scaling down/terminating old instances running the previous version. 
+Continuous Delivery (CD) relies on deployment strategies to release software updates to production environments safely, predictably, and with minimal interruption. Choosing the right release mechanism depends on factors such as application architecture (stateful vs. stateless), budget, resource constraints, and risk tolerance. 
 
-This strategy prevents service downtime because there are always healthy instances available to process incoming user requests.
+This document serves as a Proof of Concept (POC) detailing the different deployment strategies and focusing specifically on the **Rolling Deployment** strategy as the primary rollout mechanism.
 
 ---
 
-# 2. How It Works (Workflow & Steps)
+## 2. Objective
 
-The rolling deployment process operates incrementally based on a configurable **Batch Size** (or concurrency rate):
+- Introduce and explain all industry-standard deployment strategies (Recreate, Blue-Green, Canary, and Shadow/A-B).
+- Provide a detailed architectural guide on the **Rolling Deployment** strategy including its steps, benefits, risks, and suitable use cases.
+- Outline standard command lines and troubleshooting checklists for managing rollouts without needing complex Kubernetes configurations.
+
+---
+
+## 3. Deployment Strategies Explained
+
+### 3.1 Recreate Deployment
+In a **Recreate** deployment, all running instances of the active version are terminated before the new version is launched. This is simple to configure and eliminates version skew, but it introduces direct downtime during the transition phase while new containers start up.
+
+### 3.2 Blue-Green Deployment
+In a **Blue-Green** deployment, two identical production-ready environments are maintained. The new release is deployed to the inactive environment (Green) and fully verified, after which traffic routing is switched instantly. This ensures zero downtime and instant rollback, but requires double the computing resources.
+
+### 3.3 Canary Deployment
+In a **Canary** deployment, updates are deployed to a tiny subset of the production cluster (e.g. 5-10% of nodes). A small percentage of live users are routed to this canary release to gather telemetry metrics. If stable, the release is gradually rolled out to the rest of the fleet, minimizing the blast radius of any undetected bugs.
+
+### 3.4 Shadow (A/B) Deployment
+In a **Shadow (A/B)** deployment, the new version is deployed alongside the active version. Production traffic is cloned and sent to both versions, but only the active version's response is returned to the user. This allows testing with real production load without risking user impact, though it is highly complex to configure.
+
+---
+
+## 4. Rolling Deployment – Detailed Strategy
+
+A **Rolling Deployment** replaces running application instances incrementally, scaling up a batch of new instances while scaling down old ones. This prevents service-wide downtime.
+
+### 4.1 Rolling Deployment Flowchart
 
 ```mermaid
 graph TD
@@ -47,58 +85,66 @@ graph TD
     CheckMore -- No --> Complete([Deployment Success])
 ```
 
-### Detailed Steps:
-1. **Define Batch Parameters**: The deployment orchestrator determines the update batch size (e.g., 25% of total capacity or 1 instance at a time).
-2. **Provision New Version**: The orchestrator launches the new version of the application on new or designated target nodes.
-3. **Perform Health Checks**: The system monitors the startup process and verifies health status (using health endpoints like `/health`).
-4. **Shift Traffic & Terminate Old**: Once health check passes, traffic is routed to the new instances, and an equivalent batch of old instances is terminated.
-5. **Repeat**: The process repeats for the next batch until 100% of the nodes run the new version.
+### 4.2 How It Works (Workflow & Steps)
+
+1. **Batch Sizing**: Configure parameters like `max_surge` (extra instances launched) and `max_unavailable` (how many old nodes can be deleted at once). For example, a 25% batch size on a 4-node cluster updates 1 node at a time.
+2. **Launch New Instances**: The orchestrator triggers new instances with the updated package or container image.
+3. **Health Validation**: The system waits for health checks (`/health` endpoint) on port `8080/8081` to return `200 OK` responses before marking the new instances as active.
+4. **Traffic Redirect**: The load balancer redirects user traffic to the active, validated new nodes.
+5. **Decommission Old Nodes**: The corresponding number of old version nodes are terminated.
+6. **Iterate**: The system repeats the loop until 100% of the active nodes are running the new release version.
+
+### 4.3 Benefits
+
+- **Zero Downtime**: Active nodes are always present to serve user requests, ensuring uninterrupted customer access.
+- **Low Overhead**: Requires only a small resource buffer (the batch size) during the update, making it cost-efficient compared to Blue-Green.
+- **Fail-Fast Safety**: Problems in the new version are caught during the first batch update, limiting blast radius.
+
+### 4.4 Risks & Mitigations
+
+- **Version Skew**: Two versions run concurrently, which can cause session bugs or database schema conflicts.
+  - *Mitigation*: Ensure APIs are backward and forward-compatible; use sticky sessions on load balancers; write database migrations using the expand-contract pattern.
+- **Slow Rollout**: Large host groups take a long time to upgrade.
+  - *Mitigation*: Adjust batch size percentages (e.g. update 50% of instances concurrently instead of 10%).
+- **State/Session Loss**: Active user sessions on terminated hosts get dropped.
+  - *Mitigation*: Externalize state using redis session stores.
+
+### 4.5 Suitable Use Cases
+
+- **Stateless Microservices**: Ideal for web APIs and microservices where multiple minor versions can run concurrently without session loss or database schema mismatches.
+- **High-Availability APIs**: Crucial for backend APIs serving critical endpoints where zero-downtime is a hard requirement.
+- **Resource-Constrained Environments**: Best for small environments or environments with tight budgets where running duplicate parallel infrastructure (like Blue-Green) is too expensive.
+- **Small, Frequent Updates**: Well-suited for high-frequency continuous integration pipelines deploying minor code fixes or feature updates incrementally.
 
 ---
 
-# 3. Benefits
+## 5. Frequently Asked Questions (FAQs)
 
-- **Zero Downtime**: Since instances are replaced incrementally, the application continues serving traffic throughout the deployment.
-- **Low Resource Overhead**: Unlike Blue-Green deployment, which requires doubling the compute capacity temporarily, a rolling deployment only requires a small buffer of extra nodes (equivalent to the batch size).
-- **Early Feedback**: Problems (like memory leaks or start-up failures) in the new release can be caught during the first batch update, minimizing impact.
+| Question | Answer / Explanation |
+| :--- | :--- |
+| **Q1: Which deployment strategy is the most cost-effective?** | **Recreate** requires zero extra resources. **Rolling** is also very cost-effective, needing only a small temporary surge buffer (e.g. 1 node), whereas **Blue-Green** requires doubling (2x) the infrastructure. |
+| **Q2: How does Rolling Deployment prevent downtime?** | It replaces instances incrementally in small batches. The load balancer always has healthy running instances of either the old or new version to route traffic to. |
+| **Q3: What is the main risk of Rolling Updates?** | **Version skew**. Since old and new versions run concurrently, you may face session drops or database schema mismatches if APIs are not backward-compatible. |
+| **Q4: When should we choose Canary instead of Rolling?** | Choose **Canary** when deploying high-risk/major updates. It exposes the release to a tiny fraction (e.g. 5%) of live users to test stability before fully upgrading. |
+| **Q5: Can we rollback a Rolling Deployment instantly?** | No. Unlike Blue-Green where rollbacks are instant (listener routing switch), rolling updates require deploying the previous version back across all nodes batch-by-batch. |
 
----
-
-# 4. Risks & Mitigations
-
-| Risk | Description | Mitigation Strategy |
-| :--- | :--- | :--- |
-| **Version Skew** | During deployment, both old and new versions run concurrently, which can cause session inconsistencies or database schema mismatches. | Design applications to be backward and forward-compatible, use session stickiness, and apply database migrations using the expand-contract pattern. |
-| **Slow Rollouts** | Updating nodes batch-by-batch can take a long time for large clusters. | Tune batch size percentage (e.g., 25% or 50% instead of 1 instance at a time) to balance speed and safety. |
-| **Rollback Complexity** | If a failure happens midway, the cluster will be in a mixed state. | Automate rollbacks where the orchestrator stops the rollout and reverses the process to restore old instances. |
+> [!TIP]
+> **Best Practice Recommendation:**
+> Always write backward-compatible code when utilizing **Rolling Deployments** to prevent version skew bugs. If your application cannot support concurrent database schemas or API versions running at the same time, consider utilizing a **Blue-Green Deployment** strategy instead.
 
 ---
 
-# 5. Suitable Use Cases
-
-- **Web Microservices**: Stateless applications where multiple versions can coexist without side effects.
-- **Resource-Constrained Environments**: Environments where provisioning duplicate staging infrastructure is cost-prohibitive.
-- **Continuous Deployment (CD) Pipelines**: High-frequency updates where automated, minor bug fixes are rolled out incrementally.
-
----
-
-# 6. Conclusion
-
-Rolling deployments provide a highly efficient, zero-downtime release mechanism with minimal infrastructure overhead. By configuring proper batch sizes and rigorous health checks, teams can safely deploy updates with automated fallback logic.
-
----
-
-# 7. Contact Information
+## 6. Contact Information
 
 | Name | Email | Role |
 |------|-------|------|
-| Bhawna Dangarh | bhawna.dangarh.snaatak@mygurukulam.co | DevOps Engineer |
+| Bhawna Dangarh | [bhawna.dangarh.snaatak@mygurukulam.co](mailto:bhawna.dangarh.snaatak@mygurukulam.co) | DevOps Engineer |
 
 ---
 
-# 8. References
+## 7. References
 
-| Source | Description |
-|--------|-------------|
-| Kubernetes Deployment | https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#rolling-update-deployment |
-| AWS Autoscaling Rolling Updates | https://docs.aws.amazon.com/autoscaling/ec2/userguide/as-rolling-updates.html |
+| Source | Description | Link |
+|--------|-------------|------|
+| AWS ASG Instance Refresh | AWS guide on performing rolling instance updates | [https://docs.aws.amazon.com/autoscaling/ec2/userguide/asg-instance-refresh.html](https://docs.aws.amazon.com/autoscaling/ec2/userguide/asg-instance-refresh.html) |
+| Cloud-Native Deployment Strategies | CNCF guide on modern cloud deployment patterns | [https://www.cncf.io/blog/2022/10/24/kubernetes-deployment-strategies-rolling-blue-green-canary/](https://www.cncf.io/blog/2022/10/24/kubernetes-deployment-strategies-rolling-blue-green-canary/) |
