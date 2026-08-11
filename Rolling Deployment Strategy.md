@@ -36,15 +36,13 @@
 
 ## 1. Introduction
 
-Continuous Delivery (CD) uses deployment strategies to release software updates to production safely, reliably, and with minimum interruption. The right deployment strategy depends on factors such as application architecture (stateful or stateless), budget, available resources, and deployment risk. This document is a Proof of Concept (POC) that explains different deployment strategies and focuses mainly on the **Rolling Deployment** strategy.
+Deployment strategies define how a new application version is released to a production environment. The choice of strategy depends on factors such as application architecture, resource availability, budget, downtime requirements, and deployment risk. This document explains the commonly used deployment strategies and provides a detailed overview of Rolling Deployment, including its workflow, benefits, risks, and suitable use cases.
 
 ---
 
 ## 2. Objective
 
-- Introduce and explain common deployment strategies such as Recreate, Blue-Green, Canary, and Shadow/A-B.
-- Provide a detailed guide to the **Rolling Deployment** strategy, including its steps, benefits, risks, and suitable use cases.
-- Provide standard commands and troubleshooting steps for managing rollouts without requiring complex Kubernetes configurations.
+The objective of this document is to explain the commonly used deployment strategies, including Recreate, Blue-Green, Canary, and Shadow/A-B. It also provides a detailed overview of the Rolling Deployment strategy, covering its workflow, benefits, risks, and suitable use cases. Additionally, it explains how Rolling Deployment helps achieve continuous application releases with minimal downtime.
 
 ---
 
