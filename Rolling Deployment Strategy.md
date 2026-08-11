@@ -71,7 +71,8 @@ A **Rolling Deployment** replaces running application instances incrementally, s
 
 ### 4.1 Rolling Deployment Flowchart
 
-<img width="1024" height="800" alt="image" src="https://github.com/user-attachments/assets/14e19713-c862-4899-98af-3d166d3e1087" />
+<img width="1309" height="800" alt="image" src="https://github.com/user-attachments/assets/1c002b3e-17ec-4de0-88b7-a36604000c40" />
+
 
 
 ### 4.2 How It Works (Workflow & Steps)
