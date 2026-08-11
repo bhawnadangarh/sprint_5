@@ -1,6 +1,6 @@
 # Deployment Strategies
 
-<img width="1536" height="1024" alt="image" src="https://github.com/user-attachments/assets/46d4f85f-d826-4167-9b4e-cbfcb4d5e438" />
+<img width="400" height="300" alt="image" src="https://github.com/user-attachments/assets/46d4f85f-d826-4167-9b4e-cbfcb4d5e438" />
 
 ---
 
