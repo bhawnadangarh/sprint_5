@@ -1,5 +1,8 @@
 # Mutable vs Immutable Infrastructure | Comparison & Recommendation
 
+<img width="400" height="300" alt="image" src="https://github.com/user-attachments/assets/af59fcbc-093a-49bd-a599-baabd6bb2c3d" />
+
+
 ## Document Details
 
 | Author | Created | Version | Last Updated By | Last Edited On | L0 Reviewer | L1 Reviewer | L2 Reviewer |
@@ -88,9 +91,9 @@ Immutable infrastructure represents the modern standard for cloud-native deploym
 
 # 6. Contact Information
 
-| Name | Email | Role |
+| Name | Email |
 |------|-------|------|
-| Bhawna Dangarh | bhawna.dangarh.snaatak@mygurukulam.co | DevOps Engineer |
+| Bhawna Dangarh | bhawna.dangarh.snaatak@mygurukulam.co |
 
 ---
 
