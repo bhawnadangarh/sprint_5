@@ -71,19 +71,8 @@ A **Rolling Deployment** replaces running application instances incrementally, s
 
 ### 4.1 Rolling Deployment Flowchart
 
-```mermaid
-graph TD
-    Start([Start Rolling Deployment]) --> GetBatch[1. Select Batch of Instances to Update]
-    GetBatch --> ProvisionNew[2. Provision New Instances with New Version]
-    ProvisionNew --> HealthCheck{3. Check Health of New Batch?}
-    HealthCheck -- Fail --> Rollback[4. Rollback: Terminate New, Restore Old]
-    Rollback --> NotifyFail[Notify Team: Deployment Failed]
-    HealthCheck -- Pass --> RouteTraffic[5. Shift Traffic to New Instances]
-    RouteTraffic --> TerminateOld[6. Terminate Same Number of Old Instances]
-    TerminateOld --> CheckMore{7. Any Old Instances Remaining?}
-    CheckMore -- Yes --> GetBatch
-    CheckMore -- No --> Complete([Deployment Success])
-```
+<img width="1024" height="800" alt="image" src="https://github.com/user-attachments/assets/14e19713-c862-4899-98af-3d166d3e1087" />
+
 
 ### 4.2 How It Works (Workflow & Steps)
 
