@@ -1,8 +1,7 @@
-# POC – Continuous Delivery via Blue-Green Deployment
+#  Immutable infra rollout Blue Green Deployment
 
-<img width="500" alt="Blue Green Deployment" src="./images/blue_green_deployment.png" />
+<img width="400" height="300" alt="image" src="https://github.com/user-attachments/assets/5c6b1ab1-7359-42b4-8b77-f54b51ac00d4" />
 
----
 
 ## Author Information
 
@@ -57,20 +56,8 @@ If an issue occurs, rollback is instantaneous, achieved by pointing the load bal
 
 The flowchart below demonstrates the rollout steps and rollback checkpoints implemented in this POC:
 
-```mermaid
-graph TD
-    Start([Start Rollout]) --> CheckActive[1. Fetch Active Env Blue/Green]
-    CheckActive --> DeployNew[2. Deploy New Version to Inactive Environment]
-    DeployNew --> HealthCheck{3. Check Health on Port 8081?}
-    HealthCheck -- Fail --> RollbackGreen[Rollback: Scale Inactive Env down to 0]
-    RollbackGreen --> NotifyFail[Notify Team: Rollout Failed]
-    HealthCheck -- Pass --> ShiftTraffic[4. Update ALB Listener Rule to Route to Inactive TG]
-    ShiftTraffic --> MonitorProd{5. Monitor production stability?}
-    MonitorProd -- Issues --> RollbackTraffic[Rollback: Point ALB back to Active TG]
-    RollbackTraffic --> NotifyFail
-    MonitorProd -- Stable --> ScaleDownOld[6. Scale down Old Active ASG capacity to 0]
-    ScaleDownOld --> NotifySuccess[Notify Team: Rollout Success]
-```
+<img width="1536" height="800" alt="image" src="https://github.com/user-attachments/assets/7889c9ca-bad6-437a-9cb1-b913d11755c1" />
+
 
 ---
 
