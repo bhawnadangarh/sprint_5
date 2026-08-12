@@ -140,7 +140,7 @@ To ensure incidents are resolved, PagerDuty implements an automated escalation p
 
 # 6. Conclusion
 
-By establishing standardized alert definitions, routing criteria, and escalation chains, the team ensures high application reliability while protecting engineers from alert fatigue.
+The monitoring and alerting process provides a structured approach to detect application issues, notify the right teams, and escalate unresolved incidents. Prometheus identifies critical application conditions, Alertmanager routes alerts based on severity, and the L0 → L1 → L2 escalation process ensures timely incident response and resolution.
 
 ---
 
