@@ -15,19 +15,19 @@
 1. [Introduction](#1-introduction)
 2. [Objective](#2-objective)
 3. [Blue-Green Infrastructure Flowchart](#3-blue-green-infrastructure-flowchart)
-4. [Step-by-Step Implementation](#4-step-by-step-implementation)
-   4.1 [Terraform Configuration Setup](#41-terraform-configuration-setup)
-   4.2 [Provision Active (Blue) Environment](#42-provision-active-blue-environment)
-   4.3 [Deploy Update to Inactive (Green) Environment](#43-deploy-update-to-inactive-green-environment)
-   4.4 [Verify Health Checks on Inactive Target Group](#44-verify-health-checks-on-inactive-target-group)
-   4.5 [Traffic Shift Listener Switch](#45-traffic-shift-listener-switch)
-   4.6 [Scale Down and Terminate Old Environment](#46-scale-down-and-terminate-old-environment)
+4. [Step-by-Step Implementation](#4-step-by-step-implementation)  
+   4.1 [Terraform Configuration Setup](#41-terraform-configuration-setup)  
+   4.2 [Provision Active (Blue) Environment](#42-provision-active-blue-environment)  
+   4.3 [Deploy Update to Inactive (Green) Environment](#43-deploy-update-to-inactive-green-environment)  
+   4.4 [Verify Health Checks on Inactive Target Group](#44-verify-health-checks-on-inactive-target-group)  
+   4.5 [Traffic Shift Listener Switch](#45-traffic-shift-listener-switch)  
+   4.6 [Scale Down and Terminate Old Environment](#46-scale-down-and-terminate-old-environment)  
 5. [Commands Used](#5-commands-used)
 6. [Troubleshooting](#6-troubleshooting)
 7. [FAQs](#7-faqs)
 8. [Contact Information](#8-contact-information)
 9. [References](#9-references)
-
+    
 ---
 
 ## 1. Introduction
