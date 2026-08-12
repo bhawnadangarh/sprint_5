@@ -92,15 +92,9 @@ We classify alerts into three distinct severity tiers to prevent alert fatigue:
 
 # 4. Notification Channels & Routing
 
-Prometheus Alertmanager routes alerts dynamically based on labels:
+<img width="1536" height="800" alt="image" src="https://github.com/user-attachments/assets/36eab7a5-3a5e-4745-9f42-cd01b1b1300e" />
 
-```mermaid
-graph TD
-    Alert[Prometheus Alert] --> Router[Alertmanager Routing Tree]
-    Router -- severity = critical --> PagerDuty[PagerDuty On-Call]
-    Router -- severity = warning --> Slack[Slack #prod-alerts]
-    Router -- severity = info --> Email[Email Digest list]
-```
+
 
 ### Alertmanager Routing Configuration Snippet:
 ```yaml
@@ -134,27 +128,8 @@ receivers:
 
 To ensure incidents are resolved, PagerDuty implements an automated escalation policy:
 
-```mermaid
-sequenceDiagram
-    participant Alert as Alertmanager
-    participant L0 as L0 On-Call Engineer (15 mins)
-    participant L1 as L1 Leads (15 mins)
-    participant L2 as L2 Ops Managers (Infinite)
+<img width="1672" height="800" alt="image" src="https://github.com/user-attachments/assets/3d182a49-09f7-408e-8b9b-c62c282a590f" />
 
-    Alert->>L0: Trigger Alert (Critical)
-    Note over L0: Acknowledges incident within 15 minutes?
-    alt Acknowledged
-        L0->>Alert: Ack Incident & Start Resolution
-    else No Response (SLA Expired)
-        L0->>L1: Auto-Escalate Incident
-        Note over L1: Resolves within next 15 minutes?
-        alt Resolved
-            L1->>Alert: Close Incident
-        else Escalated
-            L1->>L2: Auto-Escalate to Ops Managers
-        end
-    end
-```
 
 ### Escalation Path Details:
 1. **L0 Support (Primary On-Call)**: Has **15 minutes** to acknowledge the PagerDuty alert.
