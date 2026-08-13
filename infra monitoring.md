@@ -143,6 +143,7 @@ Log in to Grafana (port 3000), add Prometheus as a Data Source, and import the s
 <img width="1912" height="965" alt="image" src="https://github.com/user-attachments/assets/a3c1269c-c6ef-4c27-8107-d85f0bf825bf" />
 <img width="1918" height="965" alt="image" src="https://github.com/user-attachments/assets/bcafa37b-1b22-48a7-8d00-8be44125d957" />
 
+<img width="1919" height="952" alt="image" src="https://github.com/user-attachments/assets/594ceffc-3f3f-4f9f-9d09-77e2570eb750" />
 
 ---
 
@@ -175,37 +176,6 @@ groups:
           description: "Available memory is < 10%. Current availability is {{ $value | printf \"%.2f\" }}%."
 ```
 
-Verify alert rule files syntax using `promtool`:
-
-```bash
-promtool check rules alert.rules.yml
-```
-
----
-
-## 4. Commands Used
-
-| Command | Description |
-| --- | --- |
-| `tar -xvf` | Extracts the downloaded Node Exporter archive |
-| `./node_exporter &` | Launches Node Exporter in the background |
-| `curl http://localhost:9100/metrics` | Queries exposed node exporter metrics |
-| `sudo systemctl start grafana-server` | Starts the Grafana service daemon |
-| `promtool check rules <file>` | Validates Prometheus alert rules syntax |
-| `curl -X POST .../-/reload` | Dynamically reloads Prometheus settings |
-
----
-
-## 5. Troubleshooting
-
-| Issue | Solution |
-| --- | --- |
-| Node Exporter service fails to start | Check port 9100 usage using `ss -lntp` or `netstat -plnt` |
-| Prometheus shows target in "DOWN" state | Verify network/firewall access on port 9100 of the target host |
-| Grafana shows "No Data" | Ensure the dashboard query is referencing the correct Prometheus datasource |
-| Prometheus alert rules validation error | Ensure indentation matches standard YAML syntax and run `promtool check` |
-
----
 
 ## 6. Contact Information
 
