@@ -79,12 +79,6 @@ sudo apt update
 sudo apt install -y prometheus
 ````
 
-Enable and start the Prometheus service:
-
-```bash
-sudo systemctl enable prometheus
-sudo systemctl start prometheus
-```
 
 Verify the Prometheus service:
 
@@ -130,9 +124,10 @@ echo "deb [signed-by=/usr/share/keyrings/grafana.gpg] https://packages.grafana.c
 sudo apt-get update
 sudo apt-get install -y grafana
 
-sudo systemctl enable grafana-server
-sudo systemctl start grafana-server
+
 ```
+<img width="1919" height="490" alt="image" src="https://github.com/user-attachments/assets/848f8300-ab62-43b1-9263-d0e41942e6c7" />
+<img width="1919" height="572" alt="image" src="https://github.com/user-attachments/assets/b72cd847-95e1-4942-8579-21019645adef" />
 
 ---
 
