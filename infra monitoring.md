@@ -255,6 +255,8 @@ ARGS="--config.file=/etc/prometheus/alertmanager.yml"
 
 ###  Alert Notification Received
 
+<img width="1919" height="939" alt="image" src="https://github.com/user-attachments/assets/dd37b6d5-0843-4b55-9edc-940598d6fdf7" />
+
 
 
 ## 6. Contact Information
