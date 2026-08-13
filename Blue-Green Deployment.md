@@ -31,24 +31,28 @@
 
 ## 1. Introduction
 
-Continuous Delivery (CD) helps us deploy application releases automatically, safely, and reliably. Instead of changing running EC2 instances directly (Mutable Infrastructure), which can cause configuration changes and downtime, we use **Blue-Green Deployment** with **Immutable Infrastructure**.
+Continuous Delivery (CD) helps us deploy new application versions **safely and with minimal downtime**. In this POC, we use **Blue-Green Deployment with Immutable Infrastructure** so that the existing production environment is not changed directly.
 
-In this setup, we keep two similar production environments:
+The setup uses two environments:
 
-* **Blue**: The current active production environment.
-* **Green**: The inactive environment where the new version is deployed and tested before sending traffic to it.
+- **Blue** – The current production environment that serves **100% of user traffic**.
+- **Green** – The new environment where the new application version is deployed and health-checked **before receiving production traffic**.
 
-If there is any issue with the new version, we can quickly roll back by pointing the load balancer back to the healthy Blue environment.
+Once Green is healthy, the **ALB Listener switches traffic from Blue to Green**. If any issue occurs, traffic can be switched back to Blue for a quick rollback.
 
 ---
 
 ## 2. Objective
 
-* Automate application deployments without downtime.
-* Use Terraform to manage Target Groups, Auto Scaling Groups (ASGs), and Application Load Balancer (ALB) routing rules.
-* Demonstrate the complete Blue-Green deployment using an automated shell script.
-* Use health checks to make sure unhealthy application versions do not receive user traffic.
-* Reduce resource usage by scaling the inactive environment to zero after a successful deployment.
+The main objective of this POC is to demonstrate a **safe and controlled Blue-Green deployment using AWS**.
+
+- Deploy the new application version in a separate **Green environment** without affecting Blue.
+- Use **Launch Templates, ASGs, Target Groups, and ALB** to manage the Blue and Green environments.
+- Perform **health checks on Green** before sending production traffic.
+- Switch **100% of traffic from Blue to Green** after Green is healthy.
+- Quickly **rollback traffic to Blue** if the Green deployment fails.
+- Scale down the old Blue environment after Green is stable to **reduce resource usage**.
+- Demonstrate the complete **rollout and rollback process manually through the AWS Console**.
 
 ---
 
