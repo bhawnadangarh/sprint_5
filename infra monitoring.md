@@ -209,7 +209,24 @@ The Alertmanager configuration file is:
 
 <img width="1919" height="963" alt="image" src="https://github.com/user-attachments/assets/5fa5ae93-df31-4b09-9dda-a2e0b22966a8" />
 
+sudo vim /etc/alertmanager/alertmanager.yml
 
+```
+global:
+  smtp_smarthost: 'smtp.gmail.com:587'
+  smtp_from: 'bhavna123porwal@gmail.com'
+  smtp_auth_username: 'bhavna123porwal@gmail.com'
+  smtp_auth_password: 'NEW_APP_PASSWORD'
+
+route:
+  receiver: 'email-notification'
+
+receivers:
+  - name: 'email-notification'
+    email_configs:
+      - to: 'bhavna123porwal@gmail.com'
+
+```
 
 
 
