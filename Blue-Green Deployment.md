@@ -15,18 +15,18 @@
 1. [Introduction](#1-introduction)
 2. [Objective](#2-objective)
 3. [Blue-Green Infrastructure Flowchart](#3-blue-green-infrastructure-flowchart)
-4. [Step-by-Step Implementation](#4-step-by-step-implementation)  
-   4.1 [Terraform Configuration Setup](#41-terraform-configuration-setup)  
-   4.2 [Provision Active (Blue) Environment](#42-provision-active-blue-environment)  
-   4.3 [Deploy Update to Inactive (Green) Environment](#43-deploy-update-to-inactive-green-environment)  
-   4.4 [Verify Health Checks on Inactive Target Group](#44-verify-health-checks-on-inactive-target-group)  
-   4.5 [Traffic Shift Listener Switch](#45-traffic-shift-listener-switch)  
-   4.6 [Scale Down and Terminate Old Environment](#46-scale-down-and-terminate-old-environment)  
-5. [Commands Used](#5-commands-used)
-6. [Troubleshooting](#6-troubleshooting)
-7. [FAQs](#7-faqs)
-8. [Contact Information](#8-contact-information)
-9. [References](#9-references)
+4. [Step-by-Step Manual Rollout via AWS Console](#4-step-by-step-manual-rollout-via-aws-console)
+   4.1 [Stage 1: Provision Initial Active Environment (Blue Only)](#41-stage-1-provision-initial-active-environment-blue-only)
+   4.2 [Stage 2: Introduce and Provision the Green Environment](#42-stage-2-introduce-and-provision-the-green-environment)
+   4.3 [Stage 3: Health Status Check Verification](#43-stage-3-health-status-check-verification)
+   4.4 [Stage 4: Shift Traffic to Green (Update ALB Listener Rule)](#44-stage-4-shift-traffic-to-green-update-alb-listener-rule)
+   4.5 [Stage 5: Scale Down Blue Environment](#45-stage-5-scale-down-blue-environment)
+5. [Rollout and Rollback Strategy (AWS Console)](#5-rollout-and-rollback-strategy-aws-console)
+   5.1 [Achieving the Rollout (Deployment Flow)](#51-achieving-the-rollout-deployment-flow)
+   5.2 [Reverting the Rollout (Rollback Flow)](#52-reverting-the-rollout-rollback-flow)
+6. [FAQs](#6-faqs)
+7. [Contact Information](#7-contact-information)
+8. [References](#8-references)
     
 ---
 
@@ -62,11 +62,11 @@ The flowchart below shows the deployment steps and rollback points used in this 
 ---
 
 
-## 5. Step-by-Step Manual Rollout via AWS Console
+## 4. Step-by-Step Manual Rollout via AWS Console
 
 The following details the sequential lifecycle of resources when executing a Blue-Green deployment manually using the AWS Management Console:
 
-### 5.1 Stage 1: Provision Initial Active Environment (Blue Only)
+### 4.1 Stage 1: Provision Initial Active Environment (Blue Only)
 At the start, only the Blue environment resources are provisioned. The Application Load Balancer routes 100% of production traffic to this environment.
 
 1. **Create Blue Target Group**:
@@ -92,7 +92,7 @@ Live users are now hitting the Blue target instances running version `v1.0.0`.
 
 ---
 
-### 5.2 Stage 2: Introduce and Provision the Green Environment
+### 4.2 Stage 2: Introduce and Provision the Green Environment
 When version `v2.0.0` is ready for release, we deploy it to the Green environment.
 
 > [!IMPORTANT]
@@ -115,7 +115,7 @@ Green instances are launched and automatically register themselves with `tg-otms
 
 ---
 
-### 5.3 Stage 3: Health Status Check Verification
+### 4.3 Stage 3: Health Status Check Verification
 Before shifting production traffic, we verify that the Green instances are healthy:
 
 1. Navigate to **EC2 Console** -> **Target Groups** -> Select `tg-otms-attendance-green`.
@@ -127,7 +127,7 @@ Before shifting production traffic, we verify that the Green instances are healt
 
 ---
 
-### 5.4 Stage 4: Shift Traffic to Green (Update ALB Listener Rule)
+### 4.4 Stage 4: Shift Traffic to Green (Update ALB Listener Rule)
 Once the Green targets are confirmed healthy, we redirect client traffic:
 
 1. Navigate to **EC2** -> **Load Balancers** -> Select your ALB.
@@ -140,7 +140,7 @@ The ALB immediately switches all routing to the Green Target Group, redirecting 
 
 ---
 
-### 5.5 Stage 5: Scale Down Blue Environment
+### 4.5 Stage 5: Scale Down Blue Environment
 After monitoring the Green environment stability under production load for a designated window, scale down the old Blue environment to release resources:
 
 1. Go to **EC2** -> **Auto Scaling Groups** -> Select `asg-otms-attendance-blue`.
@@ -153,38 +153,25 @@ AWS will terminate all instances in the Blue ASG. The rollout is complete.
 ---
 
 
-## 6. Rollout and Rollback Strategy (AWS Console)
+## 5. Rollout and Rollback Strategy (AWS Console)
 
 This section details how the Blue-Green strategy is achieved (Rollout) and how to revert changes in case of failure (Rollback) manually using the AWS Management Console.
 
-### 6.1 Achieving the Rollout (Deployment Flow)
+### 5.1 Achieving the Rollout (Deployment Flow)
 To deploy a new software version:
 1. **Provision Green Environment**: Navigate to the EC2 Console and create the Green Target Group (`tg-otms-attendance-green`), then launch/configure the Green ASG running version `v2.0.0`.
 2. **Verify Health**: Check the health status in the Green Target Group and ensure all instances show as `healthy`.
 3. **Shift Traffic**: Edit the ALB Listener Rule for path `/api/v1/attendance*` and switch the forward-to Target Group from Blue to Green. Traffic routes instantly to `v2.0.0`.
 4. **Clean up**: Edit the Blue ASG settings and scale the capacity down to `0` once Green is verified as stable.
 
-### 6.2 Reverting the Rollout (Rollback Flow)
+### 5.2 Reverting the Rollout (Rollback Flow)
 If the new Green environment fails health verification or shows production issues:
 1. **Instant Rollback**: Edit the ALB Listener Rule immediately to switch the forward-to target group from Green back to `tg-otms-attendance-blue`. All user traffic reverts instantly to the stable Blue environment.
 2. **Decommission**: Scale down the faulty Green ASG desired capacity to `0` to release resources and investigate the deployment failure.
    
 ---
 
-
-
-## 6. Troubleshooting
-
-| Issue                                                 | Cause                                                                               | Solution                                                                                            |
-| ----------------------------------------------------- | ----------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
-| **New instances fail ALB Health Checks**              | The application is not running on port 8081, or the health-check path is incorrect. | Check the Instance User Data logs (`/var/log/cloud-init-output.log`) to verify application startup. |
-| **ALB Listener Rule Priorities Conflict**             | A rule with priority `20` already exists on the target listener.                    | Change the listener rule priority in `main.tf` to a unique number.                                  |
-| **Terraform State Lock Error**                        | A previous Terraform apply failed or did not release the lock.                      | Run `terraform force-unlock <LOCK_ID>` inside the Terraform directory.                              |
-| **Instances scale up but traffic doesn't reach them** | The security group does not allow inbound port 8081 from the ALB.                   | Check that the target group security group matches the `dev-otms-attendance-sg` configuration.      |
-
----
-
-## 7. FAQs
+## 6. FAQs
 
 | Question                                 | Answer                                                                          |
 | ---------------------------------------- | ------------------------------------------------------------------------------- |
@@ -196,7 +183,7 @@ If the new Green environment fails health verification or shows production issue
 
 ---
 
-## 8. Contact Information
+## 7. Contact Information
 
 | Name           | Email                                                                                 |
 | -------------- | ------------------------------------------------------------------------------------- |
@@ -204,7 +191,7 @@ If the new Green environment fails health verification or shows production issue
 
 ---
 
-## 9. References
+## 8. References
 
 | Description                                    | Link                                                                                                 |
 | ---------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
