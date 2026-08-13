@@ -152,23 +152,23 @@ AWS will terminate all instances in the Blue ASG. The rollout is complete.
 
 ---
 
-## 6. Achieving the Strategy via Terraform (Conceptual Overview)
 
-Instead of manually clicking through the AWS Console, the same infrastructure dependencies and rollout steps can be declared as IaC in Terraform.
+## 6. Rollout and Rollback Strategy (AWS Console)
 
-### Core Terraform Resources Used:
-- **`aws_lb_target_group`**: Declares target groups for both environments (`tg_blue` and `tg_green`).
-- **`aws_launch_template`**: Declares configurations like AMI ID and instance sizes for both versions.
-- **`aws_autoscaling_group`**: Declares ASGs for both environments (`asg_blue` and `asg_green`), linking them to their respective target groups and launch templates.
-- **`aws_lb_listener_rule`**: Statically defines routing rules for the path pattern.
-- **`data` blocks**: Used to query existing shared network resources (e.g. `data "aws_lb"`, `data "aws_lb_listener"`, `data "aws_vpc"`).
+This section details how the Blue-Green strategy is achieved (Rollout) and how to revert changes in case of failure (Rollback) manually using the AWS Management Console.
 
-### How Rollout is Performed via TF:
-1. **Initial state**: `aws_lb_listener_rule` has `target_group_arn = aws_lb_target_group.tg_blue.arn` and `asg_blue` has desired capacity = 2.
-2. **Provision Green**: Declare `tg_green` and `asg_green` in `main.tf` with capacity = 2. Run `terraform apply`.
-3. **Shift Traffic**: Edit the listener rule in `main.tf` to point to Green: `target_group_arn = aws_lb_target_group.tg_green.arn`. Run `terraform apply`.
-4. **Decommission Blue**: Change `blue_desired_capacity` variable or parameter in file to `0`. Run `terraform apply`.
+### 6.1 Achieving the Rollout (Deployment Flow)
+To deploy a new software version:
+1. **Provision Green Environment**: Navigate to the EC2 Console and create the Green Target Group (`tg-otms-attendance-green`), then launch/configure the Green ASG running version `v2.0.0`.
+2. **Verify Health**: Check the health status in the Green Target Group and ensure all instances show as `healthy`.
+3. **Shift Traffic**: Edit the ALB Listener Rule for path `/api/v1/attendance*` and switch the forward-to Target Group from Blue to Green. Traffic routes instantly to `v2.0.0`.
+4. **Clean up**: Edit the Blue ASG settings and scale the capacity down to `0` once Green is verified as stable.
 
+### 6.2 Reverting the Rollout (Rollback Flow)
+If the new Green environment fails health verification or shows production issues:
+1. **Instant Rollback**: Edit the ALB Listener Rule immediately to switch the forward-to target group from Green back to `tg-otms-attendance-blue`. All user traffic reverts instantly to the stable Blue environment.
+2. **Decommission**: Scale down the faulty Green ASG desired capacity to `0` to release resources and investigate the deployment failure.
+   
 ---
 
 
