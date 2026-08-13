@@ -140,6 +140,10 @@ Log in to Grafana (port 3000), add Prometheus as a Data Source, and import the s
 3. Go to **Dashboards -> New -> Import**.
 4. Enter Dashboard ID `1860` and select the Prometheus datasource.
 
+<img width="1912" height="965" alt="image" src="https://github.com/user-attachments/assets/a3c1269c-c6ef-4c27-8107-d85f0bf825bf" />
+<img width="1918" height="965" alt="image" src="https://github.com/user-attachments/assets/bcafa37b-1b22-48a7-8d00-8be44125d957" />
+
+
 ---
 
 ### 3.5 Configure Alerts
