@@ -65,27 +65,6 @@ The flowchart below shows the deployment steps and rollback points used in this 
 
 ### 4.1 Terraform Configuration Setup
 
-This deployment uses the network infrastructure created in the earlier sprints.
-
-Instead of directly writing VPC and subnet IDs, Terraform finds the required resources using `data` blocks:
-
-```hcl
-data "aws_vpc" "main" {
-  tags = { Name = "${var.environment}-otms-vpc" }
-}
-
-data "aws_subnet" "backend" {
-  tags = { Name = "${var.environment}_otms_backend_subnet_a" }
-}
-
-data "aws_security_group" "attendance" {
-  tags = { Name = "${var.environment}-otms-attendance-sg" }
-}
-
-data "aws_lb" "otms_alb" {
-  name = "${var.environment}-otms-alb"
-}
-```
 ### `providers.tf`
 This file configures the required Terraform version and specifies the AWS provider.
 ```hcl
