@@ -152,6 +152,12 @@ Log in to Grafana (port 3000), add Prometheus as a Data Source, and import the s
 
 Add infrastructure alert rules to your Prometheus configuration (e.g. `alert.rules.yml`).
 
+```
+
+sudo vim /etc/prometheus/alert.rules.yml
+
+```
+
 ```yaml
 groups:
   - name: infra-alerts
