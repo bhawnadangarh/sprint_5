@@ -66,6 +66,73 @@ Verify that metrics are being exposed locally on port 9100:
 curl http://localhost:9100/metrics
 ```
 
+
+````markdown
+### 3.2 Install Prometheus
+
+Install and start Prometheus on the monitoring server.
+
+```bash
+sudo apt update
+sudo apt install -y prometheus
+````
+
+Enable and start the Prometheus service:
+
+```bash
+sudo systemctl enable prometheus
+sudo systemctl start prometheus
+```
+
+Verify the Prometheus service:
+
+```bash
+sudo systemctl status prometheus
+```
+
+Verify that Prometheus is running on port `9090`:
+
+```bash
+curl http://localhost:9090/-/ready
+```
+
+If Prometheus is running successfully, the response should confirm that the Prometheus server is ready.
+
+````
+
+Then your next section will be:
+
+```markdown
+### 3.3 Configure Prometheus Target
+````
+
+So numbering becomes:
+
+```text
+3.1 Install Node Exporter
+3.2 Install Prometheus
+3.3 Configure Prometheus Target
+3.4 Install Grafana
+3.5 Import Dashboard
+3.6 Configure Alerts
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 ---
 
 ### 3.2 Configure Prometheus Target
