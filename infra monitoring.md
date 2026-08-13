@@ -59,15 +59,17 @@ tar -xvf node_exporter-1.7.0.linux-amd64.tar.gz
 cd node_exporter-1.7.0.linux-amd64
 ./node_exporter &
 ```
+<img width="1919" height="849" alt="image" src="https://github.com/user-attachments/assets/27a1f086-48f2-4cc0-832d-0ff894271caa" />
 
 Verify that metrics are being exposed locally on port 9100:
 
 ```bash
 curl http://localhost:9100/metrics
 ```
+<img width="1662" height="721" alt="image" src="https://github.com/user-attachments/assets/41c40ec3-db6b-4f9e-9cf2-66587a0327da" />
 
 
-````markdown
+
 ### 3.2 Install Prometheus
 
 Install and start Prometheus on the monitoring server.
@@ -95,43 +97,10 @@ Verify that Prometheus is running on port `9090`:
 ```bash
 curl http://localhost:9090/-/ready
 ```
-
-If Prometheus is running successfully, the response should confirm that the Prometheus server is ready.
-
-````
-
-Then your next section will be:
-
-```markdown
-### 3.3 Configure Prometheus Target
-````
-
-So numbering becomes:
-
-```text
-3.1 Install Node Exporter
-3.2 Install Prometheus
-3.3 Configure Prometheus Target
-3.4 Install Grafana
-3.5 Import Dashboard
-3.6 Configure Alerts
-```
+<img width="1919" height="467" alt="image" src="https://github.com/user-attachments/assets/6a83ac4e-de13-4c6b-98f0-2cc6ff9338e7" />
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+<img width="1917" height="736" alt="image" src="https://github.com/user-attachments/assets/7998aa3b-797d-4854-9e31-f09b8c86bcb6" />
 
 ---
 
@@ -144,12 +113,6 @@ scrape_configs:
   - job_name: 'node-exporter'
     static_configs:
       - targets: ['localhost:9100']
-```
-
-Reload Prometheus configuration:
-
-```bash
-curl -X POST http://localhost:9090/-/reload
 ```
 
 ---
