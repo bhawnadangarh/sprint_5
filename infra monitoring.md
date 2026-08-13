@@ -152,10 +152,6 @@ Log in to Grafana on port `3000`, add Prometheus as a Data Source, and import th
 
 <img width="1918" height="965" alt="image" src="https://github.com/user-attachments/assets/bcafa37b-1b22-48a7-8d00-8be44125d957" />
 
-<img width="1919" height="952" alt="image" src="https://github.com/user-attachments/assets/594ceffc-3f3f-4f9f-9d09-77e2570eb750" />
-
-<img width="1918" height="967" alt="image" src="https://github.com/user-attachments/assets/be837b54-42de-4c96-a0cb-7fd645153e1c" />
-
 ---
 
 ### 3.6 Configure Alerts
@@ -323,6 +319,8 @@ Example CPU stress command used for testing:
 ```bash
 stress --cpu 1 --timeout 180
 ```
+<img width="1918" height="967" alt="image" src="https://github.com/user-attachments/assets/be837b54-42de-4c96-a0cb-7fd645153e1c" />
+
 
 The alert flow is:
 
