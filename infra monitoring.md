@@ -209,7 +209,7 @@ The Alertmanager configuration file is:
 
 <img width="1919" height="963" alt="image" src="https://github.com/user-attachments/assets/5fa5ae93-df31-4b09-9dda-a2e0b22966a8" />
 
-sudo vim /etc/alertmanager/alertmanager.yml
+sudo vim /etc/prometheus/alertmanager.yml
 
 ```
 global:
