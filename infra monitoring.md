@@ -189,6 +189,7 @@ Install Alertmanager on the same monitoring server where Prometheus is running.
 sudo apt update
 sudo apt install -y prometheus-alertmanager
 ````
+<img width="1919" height="963" alt="image" src="https://github.com/user-attachments/assets/5fa5ae93-df31-4b09-9dda-a2e0b22966a8" />
 
 #### Verify Alertmanager
 
@@ -204,12 +205,9 @@ sudo systemctl status prometheus-alertmanager
 The Alertmanager configuration file is:
 
 ```bash
-/etc/alertmanager/alertmanager.yml
-```
-
-<img width="1919" height="963" alt="image" src="https://github.com/user-attachments/assets/5fa5ae93-df31-4b09-9dda-a2e0b22966a8" />
-
 sudo vim /etc/prometheus/alertmanager.yml
+
+```
 
 ```
 global:
@@ -228,8 +226,18 @@ receivers:
 
 ```
 
+#### Connect Prometheus to Alertmanager
 
+Edit
+```
+sudo vim /etc/prometheus/prometheus.yml
 
+```
+```
+rule_files:
+  - "/etc/prometheus/alert.rules.yml"
+
+```
 
 ## 6. Contact Information
 
