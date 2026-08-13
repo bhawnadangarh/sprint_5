@@ -61,400 +61,117 @@ The flowchart below shows the deployment steps and rollback points used in this 
 
 ---
 
-## 4. Step-by-Step Implementation
 
-### 4.1 Terraform Configuration Setup
+## 5. Step-by-Step Manual Rollout via AWS Console
 
-### `providers.tf`
-This file configures the required Terraform version and specifies the AWS provider.
-```hcl
-terraform {
-  required_version = ">= 1.0.0"
-  required_providers {
-    aws = {
-      source  = "hashicorp/aws"
-      version = "~> 5.0"
-    }
-  }
-}
+The following details the sequential lifecycle of resources when executing a Blue-Green deployment manually using the AWS Management Console:
 
-provider "aws" {
-  region = var.aws_region
-}
-```
+### 5.1 Stage 1: Provision Initial Active Environment (Blue Only)
+At the start, only the Blue environment resources are provisioned. The Application Load Balancer routes 100% of production traffic to this environment.
 
-### `variables.tf`
-This file declares all variables needed to control the Blue-Green environment routing, capacity, and application versions.
-```hcl
-variable "aws_region" {
-  type        = string
-  default     = "us-east-1"
-  description = "AWS Region"
-}
+1. **Create Blue Target Group**:
+   - Navigate to the **EC2 Console** -> **Target Groups** -> **Create Target Group**.
+   - Target type: `Instances`. Name: `tg-otms-attendance-blue`. Port: `8081`. Protocol: `HTTP`.
+   - Configure Health Checks: Path `/api/v1/attendance/health`, Protocol `HTTP`, Port `8081`.
+2. **Create Launch Template**:
+   - Go to **EC2** -> **Launch Templates** -> **Create Launch Template**.
+   - Specify AMI ID (containing version `v1.0.0`), instance type (`t2.micro`), and Key Pair.
+   - Configure Security Group (`dev-otms-attendance-sg`) to allow incoming traffic on port 8081.
+3. **Create Blue Auto Scaling Group (ASG)**:
+   - Go to **EC2** -> **Auto Scaling Groups** -> **Create Auto Scaling Group**.
+   - Link the Blue Launch Template. Choose VPC and private backend subnets.
+   - Under **Load Balancing**, select "Attach to an existing load balancer" and choose Target Group `tg-otms-attendance-blue`.
+   - Set size: Desired = `2`, Min = `2`, Max = `5`.
+4. **Configure ALB Listener Rule**:
+   - Navigate to **EC2** -> **Load Balancers** -> Select your ALB (`dev-otms-alb`).
+   - Go to the **Listeners and Rules** tab -> Select HTTP:80 Listener -> **Manage Rules** -> **Add Rule**.
+   - Set condition: Path is `/api/v1/attendance*`.
+   - Set action: Forward to Target Group `tg-otms-attendance-blue`. Priority: `20`.
 
-variable "environment" {
-  type        = string
-  default     = "dev"
-  description = "Deployment environment (e.g. dev, prod)"
-}
-
-variable "active_color" {
-  type        = string
-  default     = "blue"
-  description = "Active environment color (blue or green)"
-}
-
-variable "blue_desired_capacity" {
-  type        = number
-  default     = 2
-  description = "Desired capacity for the Blue ASG"
-}
-
-variable "green_desired_capacity" {
-  type        = number
-  default     = 0
-  description = "Desired capacity for the Green ASG"
-}
-
-variable "blue_app_version" {
-  type        = string
-  default     = "v1.0.0"
-  description = "Application version running on the Blue environment"
-}
-
-variable "green_app_version" {
-  type        = string
-  default     = "v1.0.0"
-  description = "Application version running on the Green environment"
-}
-
-variable "ami_id" {
-  type        = string
-  default     = "ami-0c7217cdde317cfec"
-  description = "AMI ID for the attendance service instances"
-}
-
-variable "instance_type" {
-  type        = string
-  default     = "t2.micro"
-  description = "EC2 Instance Type"
-}
-
-variable "key_name" {
-  type        = string
-  default     = "snaatak"
-  description = "SSH Key pair name"
-}
-
-variable "rule_priority" {
-  type        = number
-  default     = 20
-  description = "Priority for the ALB listener rule"
-}
-```
-
-### `main.tf`
-This file configures the data lookups, target groups for both environments, launch templates, Auto Scaling Groups, and the ALB listener rule for dynamic traffic shifting.
-```hcl
-# 1. Network & Resource Lookups
-data "aws_vpc" "main" {
-  tags = { Name = "${var.environment}-otms-vpc" }
-}
-
-data "aws_subnet" "backend" {
-  tags = { Name = "${var.environment}_otms_backend_subnet_a" }
-}
-
-data "aws_security_group" "attendance" {
-  tags = { Name = "${var.environment}-otms-attendance-sg" }
-}
-
-data "aws_lb" "otms_alb" {
-  name = "${var.environment}-otms-alb"
-}
-
-data "aws_lb_listener" "otms_http" {
-  load_balancer_arn = data.aws_lb.otms_alb.arn
-  port              = 80
-}
-
-# 2. Target Groups
-resource "aws_lb_target_group" "tg_blue" {
-  name     = "tg-otms-attendance-blue"
-  port     = 8081
-  protocol = "HTTP"
-  vpc_id   = data.aws_vpc.main.id
-
-  health_check {
-    path                = "/api/v1/attendance/health"
-    port                = "8081"
-    protocol            = "HTTP"
-    matcher             = "200-399"
-    interval            = 15
-    timeout             = 5
-    healthy_threshold   = 2
-    unhealthy_threshold = 3
-  }
-}
-
-resource "aws_lb_target_group" "tg_green" {
-  name     = "tg-otms-attendance-green"
-  port     = 8081
-  protocol = "HTTP"
-  vpc_id   = data.aws_vpc.main.id
-
-  health_check {
-    path                = "/api/v1/attendance/health"
-    port                = "8081"
-    protocol            = "HTTP"
-    matcher             = "200-399"
-    interval            = 15
-    timeout             = 5
-    healthy_threshold   = 2
-    unhealthy_threshold = 3
-  }
-}
-
-# 3. Launch Templates
-resource "aws_launch_template" "lt_blue" {
-  name          = "${var.environment}-otms-attendance-lt-blue"
-  image_id      = var.ami_id
-  instance_type = var.instance_type
-  key_name      = var.key_name
-
-  vpc_security_group_ids = [data.aws_security_group.attendance.id]
-
-  tag_specifications {
-    resource_type = "instance"
-    tags = {
-      Name        = "${var.environment}-otms-attendance-blue"
-      Environment = var.environment
-      Version     = var.blue_app_version
-    }
-  }
-}
-
-resource "aws_launch_template" "lt_green" {
-  name          = "${var.environment}-otms-attendance-lt-green"
-  image_id      = var.ami_id
-  instance_type = var.instance_type
-  key_name      = var.key_name
-
-  vpc_security_group_ids = [data.aws_security_group.attendance.id]
-
-  tag_specifications {
-    resource_type = "instance"
-    tags = {
-      Name        = "${var.environment}-otms-attendance-green"
-      Environment = var.environment
-      Version     = var.green_app_version
-    }
-  }
-}
-
-# 4. Auto Scaling Groups
-resource "aws_autoscaling_group" "asg_blue" {
-  name                = "${var.environment}-otms-attendance-asg-blue"
-  vpc_zone_identifier = [data.aws_subnet.backend.id]
-  target_group_arns   = [aws_lb_target_group.tg_blue.arn]
-  min_size            = 0
-  max_size            = 5
-  desired_capacity    = var.blue_desired_capacity
-
-  launch_template {
-    id      = aws_launch_template.lt_blue.id
-    version = "$Latest"
-  }
-}
-
-resource "aws_autoscaling_group" "asg_green" {
-  name                = "${var.environment}-otms-attendance-asg-green"
-  vpc_zone_identifier = [data.aws_subnet.backend.id]
-  target_group_arns   = [aws_lb_target_group.tg_green.arn]
-  min_size            = 0
-  max_size            = 5
-  desired_capacity    = var.green_desired_capacity
-
-  launch_template {
-    id      = aws_launch_template.lt_green.id
-    version = "$Latest"
-  }
-}
-
-# 5. ALB Listener Routing Rule
-resource "aws_lb_listener_rule" "attendance" {
-  listener_arn = data.aws_lb_listener.otms_http.arn
-  priority     = var.rule_priority
-
-  action {
-    type             = "forward"
-    target_group_arn = var.active_color == "blue" ? aws_lb_target_group.tg_blue.arn : aws_lb_target_group.tg_green.arn
-    order            = 2
-  }
-
-  condition {
-    path_pattern {
-      values = ["/api/v1/attendance*"]
-    }
-  }
-}
-```
-
-### `outputs.tf`
-This file exposes output parameters such as the active color and target group details.
-```hcl
-output "active_environment" {
-  value       = var.active_color
-  description = "The active production environment color (blue/green)"
-}
-
-output "blue_tg_arn" {
-  value       = aws_lb_target_group.tg_blue.arn
-  description = "Blue Target Group ARN"
-}
-
-output "green_tg_arn" {
-  value       = aws_lb_target_group.tg_green.arn
-  description = "Green Target Group ARN"
-}
-```
-
+Live users are now hitting the Blue target instances running version `v1.0.0`.
 
 ---
 
-### 4.2 Provision Active (Blue) Environment
+### 5.2 Stage 2: Introduce and Provision the Green Environment
+When version `v2.0.0` is ready for release, we deploy it to the Green environment.
 
-Initially, the **Blue** environment is active.
+> [!IMPORTANT]
+> At this stage, **do NOT edit the ALB Listener Rule**. The rule must remain pointing to `tg-otms-attendance-blue` so that production traffic is unaffected.
 
-It runs application version `v1.0.0`.
+1. **Create Green Target Group**:
+   - Go to **Target Groups** -> **Create Target Group**.
+   - Target type: `Instances`. Name: `tg-otms-attendance-green`. Port: `8081`. Protocol: `HTTP`.
+   - Set the same health check path: `/api/v1/attendance/health` on Port `8081`.
+2. **Update Launch Template (Create New Version)**:
+   - Go to **Launch Templates** -> Select your template -> **Modify Template (Create New Version)**.
+   - Update the AMI ID to refer to the new image containing version `v2.0.0`.
+3. **Create Green Auto Scaling Group (ASG)**:
+   - Go to **Auto Scaling Groups** -> **Create Auto Scaling Group**.
+   - Link the Launch Template and specify the new template version containing `v2.0.0`.
+   - Under **Load Balancing**, choose Target Group `tg-otms-attendance-green`.
+   - Set size: Desired = `2`, Min = `2`, Max = `5`.
 
-The Blue Auto Scaling Group (`asg_blue`) runs 2 instances, while the Green environment has a desired capacity of `0`.
-
-```hcl
-# terraform.tfvars
-active_color      = "blue"
-blue_desired_capacity  = 2
-green_desired_capacity = 0
-blue_app_version  = "v1.0.0"
-green_app_version = "v1.0.0"
-```
-
-Initialize and deploy the initial environment:
-
-```bash
-terraform -chdir=terraform init
-terraform -chdir=terraform apply -auto-approve
-```
+Green instances are launched and automatically register themselves with `tg-otms-attendance-green`.
 
 ---
 
-### 4.3 Deploy Update to Inactive (Green) Environment
+### 5.3 Stage 3: Health Status Check Verification
+Before shifting production traffic, we verify that the Green instances are healthy:
 
-To deploy version `v2.0.0`, the deployment script updates the inactive Green environment.
+1. Navigate to **EC2 Console** -> **Target Groups** -> Select `tg-otms-attendance-green`.
+2. Under the **Targets** tab, view the status of the registered targets.
+3. Wait until the health status changes from `initial` to **`healthy`**.
 
-The Green ASG is scaled up to 2 instances and the new application version is deployed:
-
-```bash
-# Update Green environment while keeping Blue environment active
-terraform -chdir=terraform apply \
-  -var="green_desired_capacity=2" \
-  -var="green_app_version=v2.0.0" \
-  -auto-approve
-```
-
-This creates new instances running `v2.0.0` under the Green Target Group (`tg_green`).
-
-At this time, users are still sending requests to the Blue Target Group (`tg_blue`).
+* **If healthy**: Proceed to Stage 4.
+* **If unhealthy**: Stop the deployment. Rollback immediately by deleting/scaling down the Green ASG `asg-otms-attendance-green` size to `0` and investigate logs.
 
 ---
 
-### 4.4 Verify Health Checks on Inactive Target Group
+### 5.4 Stage 4: Shift Traffic to Green (Update ALB Listener Rule)
+Once the Green targets are confirmed healthy, we redirect client traffic:
 
-The Load Balancer checks the health of the Green environment on port `8081`.
+1. Navigate to **EC2** -> **Load Balancers** -> Select your ALB.
+2. Go to **Listeners and Rules** -> Select the HTTP:80 listener -> View/Edit rules.
+3. Select the rule with path `/api/v1/attendance*` and click **Edit**.
+4. In the **Actions** section, change the target group from `tg-otms-attendance-blue` to **`tg-otms-attendance-green`**.
+5. Save the rule.
 
-It uses the following health-check path:
-
-```hcl
-resource "aws_lb_target_group" "tg_green" {
-  name     = "tg-otms-attendance-green"
-  port     = 8081
-  protocol = "HTTP"
-  vpc_id   = data.aws_vpc.main.id
-
-  health_check {
-    path                = "/api/v1/attendance/health"
-    port                = "8081"
-    protocol            = "HTTP"
-    matcher             = "200-399"
-    interval            = 15
-    timeout             = 5
-    healthy_threshold   = 2
-    unhealthy_threshold = 3
-  }
-}
-```
-
-If the health check fails, the deployment script rolls back by scaling the Green environment down to `0`.
+The ALB immediately switches all routing to the Green Target Group, redirecting 100% of user traffic to version `v2.0.0`.
 
 ---
 
-### 4.5 Traffic Shift Listener Switch
+### 5.5 Stage 5: Scale Down Blue Environment
+After monitoring the Green environment stability under production load for a designated window, scale down the old Blue environment to release resources:
 
-After all Green instances pass the health checks, the Application Load Balancer (ALB) is updated to send 100% of user traffic to the Green Target Group.
+1. Go to **EC2** -> **Auto Scaling Groups** -> Select `asg-otms-attendance-blue`.
+2. Under the **Details** tab, click **Edit** on group details.
+3. Update group sizes: Desired = `0`, Min = `0`, Max = `5` (or `0`).
+4. Save the configuration.
 
-```hcl
-action {
-  type             = "forward"
-  target_group_arn = var.active_color == "blue" ? aws_lb_target_group.tg_blue.arn : aws_lb_target_group.tg_green.arn
-  order            = 2
-}
-```
-
-Traffic is switched using the following command:
-
-```bash
-terraform -chdir=terraform apply \
-  -var="green_desired_capacity=2" \
-  -var="green_app_version=v2.0.0" \
-  -var="active_color=green" \
-  -auto-approve
-```
+AWS will terminate all instances in the Blue ASG. The rollout is complete.
 
 ---
 
-### 4.6 Scale Down and Terminate Old Environment
+## 6. Achieving the Strategy via Terraform (Conceptual Overview)
 
-After the Green environment receives traffic successfully and remains stable, the old Blue environment is scaled down.
+Instead of manually clicking through the AWS Console, the same infrastructure dependencies and rollout steps can be declared as IaC in Terraform.
 
-The Blue capacity is changed to `0`:
+### Core Terraform Resources Used:
+- **`aws_lb_target_group`**: Declares target groups for both environments (`tg_blue` and `tg_green`).
+- **`aws_launch_template`**: Declares configurations like AMI ID and instance sizes for both versions.
+- **`aws_autoscaling_group`**: Declares ASGs for both environments (`asg_blue` and `asg_green`), linking them to their respective target groups and launch templates.
+- **`aws_lb_listener_rule`**: Statically defines routing rules for the path pattern.
+- **`data` blocks**: Used to query existing shared network resources (e.g. `data "aws_lb"`, `data "aws_lb_listener"`, `data "aws_vpc"`).
 
-```bash
-terraform -chdir=terraform apply \
-  -var="green_desired_capacity=2" \
-  -var="green_app_version=v2.0.0" \
-  -var="active_color=green" \
-  -var="blue_desired_capacity=0" \
-  -auto-approve
-```
-
-Now the Green environment has completely replaced the Blue environment.
-
-The rollback window is closed and the immutable rollout is complete.
+### How Rollout is Performed via TF:
+1. **Initial state**: `aws_lb_listener_rule` has `target_group_arn = aws_lb_target_group.tg_blue.arn` and `asg_blue` has desired capacity = 2.
+2. **Provision Green**: Declare `tg_green` and `asg_green` in `main.tf` with capacity = 2. Run `terraform apply`.
+3. **Shift Traffic**: Edit the listener rule in `main.tf` to point to Green: `target_group_arn = aws_lb_target_group.tg_green.arn`. Run `terraform apply`.
+4. **Decommission Blue**: Change `blue_desired_capacity` variable or parameter in file to `0`. Run `terraform apply`.
 
 ---
 
-## 5. Commands Used
 
-| Command                                                 | Description                                                                                       |
-| ------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
-| `terraform -chdir=terraform init`                       | Initializes Terraform and downloads the required providers.                                       |
-| `terraform -chdir=terraform plan`                       | Shows the changes Terraform will make before applying them.                                       |
-| `terraform -chdir=terraform apply`                      | Applies the changes to AWS infrastructure, such as scaling environments and changing ALB routing. |
-| `terraform -chdir=terraform output`                     | Shows the current Terraform output values, such as `active_environment`.                          |
-| `bash deploy.sh`                                        | Runs the complete Blue-Green deployment script.                                                   |
-| `curl -I http://<ALB-DNS-URL>/api/v1/attendance/health` | Checks whether the API is responding correctly.                                                   |
-
----
 
 ## 6. Troubleshooting
 
