@@ -86,6 +86,260 @@ data "aws_lb" "otms_alb" {
   name = "${var.environment}-otms-alb"
 }
 ```
+### `providers.tf`
+This file configures the required Terraform version and specifies the AWS provider.
+```hcl
+terraform {
+  required_version = ">= 1.0.0"
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 5.0"
+    }
+  }
+}
+
+provider "aws" {
+  region = var.aws_region
+}
+```
+
+### `variables.tf`
+This file declares all variables needed to control the Blue-Green environment routing, capacity, and application versions.
+```hcl
+variable "aws_region" {
+  type        = string
+  default     = "us-east-1"
+  description = "AWS Region"
+}
+
+variable "environment" {
+  type        = string
+  default     = "dev"
+  description = "Deployment environment (e.g. dev, prod)"
+}
+
+variable "active_color" {
+  type        = string
+  default     = "blue"
+  description = "Active environment color (blue or green)"
+}
+
+variable "blue_desired_capacity" {
+  type        = number
+  default     = 2
+  description = "Desired capacity for the Blue ASG"
+}
+
+variable "green_desired_capacity" {
+  type        = number
+  default     = 0
+  description = "Desired capacity for the Green ASG"
+}
+
+variable "blue_app_version" {
+  type        = string
+  default     = "v1.0.0"
+  description = "Application version running on the Blue environment"
+}
+
+variable "green_app_version" {
+  type        = string
+  default     = "v1.0.0"
+  description = "Application version running on the Green environment"
+}
+
+variable "ami_id" {
+  type        = string
+  default     = "ami-0c7217cdde317cfec"
+  description = "AMI ID for the attendance service instances"
+}
+
+variable "instance_type" {
+  type        = string
+  default     = "t2.micro"
+  description = "EC2 Instance Type"
+}
+
+variable "key_name" {
+  type        = string
+  default     = "snaatak"
+  description = "SSH Key pair name"
+}
+
+variable "rule_priority" {
+  type        = number
+  default     = 20
+  description = "Priority for the ALB listener rule"
+}
+```
+
+### `main.tf`
+This file configures the data lookups, target groups for both environments, launch templates, Auto Scaling Groups, and the ALB listener rule for dynamic traffic shifting.
+```hcl
+# 1. Network & Resource Lookups
+data "aws_vpc" "main" {
+  tags = { Name = "${var.environment}-otms-vpc" }
+}
+
+data "aws_subnet" "backend" {
+  tags = { Name = "${var.environment}_otms_backend_subnet_a" }
+}
+
+data "aws_security_group" "attendance" {
+  tags = { Name = "${var.environment}-otms-attendance-sg" }
+}
+
+data "aws_lb" "otms_alb" {
+  name = "${var.environment}-otms-alb"
+}
+
+data "aws_lb_listener" "otms_http" {
+  load_balancer_arn = data.aws_lb.otms_alb.arn
+  port              = 80
+}
+
+# 2. Target Groups
+resource "aws_lb_target_group" "tg_blue" {
+  name     = "tg-otms-attendance-blue"
+  port     = 8081
+  protocol = "HTTP"
+  vpc_id   = data.aws_vpc.main.id
+
+  health_check {
+    path                = "/api/v1/attendance/health"
+    port                = "8081"
+    protocol            = "HTTP"
+    matcher             = "200-399"
+    interval            = 15
+    timeout             = 5
+    healthy_threshold   = 2
+    unhealthy_threshold = 3
+  }
+}
+
+resource "aws_lb_target_group" "tg_green" {
+  name     = "tg-otms-attendance-green"
+  port     = 8081
+  protocol = "HTTP"
+  vpc_id   = data.aws_vpc.main.id
+
+  health_check {
+    path                = "/api/v1/attendance/health"
+    port                = "8081"
+    protocol            = "HTTP"
+    matcher             = "200-399"
+    interval            = 15
+    timeout             = 5
+    healthy_threshold   = 2
+    unhealthy_threshold = 3
+  }
+}
+
+# 3. Launch Templates
+resource "aws_launch_template" "lt_blue" {
+  name          = "${var.environment}-otms-attendance-lt-blue"
+  image_id      = var.ami_id
+  instance_type = var.instance_type
+  key_name      = var.key_name
+
+  vpc_security_group_ids = [data.aws_security_group.attendance.id]
+
+  tag_specifications {
+    resource_type = "instance"
+    tags = {
+      Name        = "${var.environment}-otms-attendance-blue"
+      Environment = var.environment
+      Version     = var.blue_app_version
+    }
+  }
+}
+
+resource "aws_launch_template" "lt_green" {
+  name          = "${var.environment}-otms-attendance-lt-green"
+  image_id      = var.ami_id
+  instance_type = var.instance_type
+  key_name      = var.key_name
+
+  vpc_security_group_ids = [data.aws_security_group.attendance.id]
+
+  tag_specifications {
+    resource_type = "instance"
+    tags = {
+      Name        = "${var.environment}-otms-attendance-green"
+      Environment = var.environment
+      Version     = var.green_app_version
+    }
+  }
+}
+
+# 4. Auto Scaling Groups
+resource "aws_autoscaling_group" "asg_blue" {
+  name                = "${var.environment}-otms-attendance-asg-blue"
+  vpc_zone_identifier = [data.aws_subnet.backend.id]
+  target_group_arns   = [aws_lb_target_group.tg_blue.arn]
+  min_size            = 0
+  max_size            = 5
+  desired_capacity    = var.blue_desired_capacity
+
+  launch_template {
+    id      = aws_launch_template.lt_blue.id
+    version = "$Latest"
+  }
+}
+
+resource "aws_autoscaling_group" "asg_green" {
+  name                = "${var.environment}-otms-attendance-asg-green"
+  vpc_zone_identifier = [data.aws_subnet.backend.id]
+  target_group_arns   = [aws_lb_target_group.tg_green.arn]
+  min_size            = 0
+  max_size            = 5
+  desired_capacity    = var.green_desired_capacity
+
+  launch_template {
+    id      = aws_launch_template.lt_green.id
+    version = "$Latest"
+  }
+}
+
+# 5. ALB Listener Routing Rule
+resource "aws_lb_listener_rule" "attendance" {
+  listener_arn = data.aws_lb_listener.otms_http.arn
+  priority     = var.rule_priority
+
+  action {
+    type             = "forward"
+    target_group_arn = var.active_color == "blue" ? aws_lb_target_group.tg_blue.arn : aws_lb_target_group.tg_green.arn
+    order            = 2
+  }
+
+  condition {
+    path_pattern {
+      values = ["/api/v1/attendance*"]
+    }
+  }
+}
+```
+
+### `outputs.tf`
+This file exposes output parameters such as the active color and target group details.
+```hcl
+output "active_environment" {
+  value       = var.active_color
+  description = "The active production environment color (blue/green)"
+}
+
+output "blue_tg_arn" {
+  value       = aws_lb_target_group.tg_blue.arn
+  description = "Blue Target Group ARN"
+}
+
+output "green_tg_arn" {
+  value       = aws_lb_target_group.tg_green.arn
+  description = "Green Target Group ARN"
+}
+```
+
 
 ---
 
