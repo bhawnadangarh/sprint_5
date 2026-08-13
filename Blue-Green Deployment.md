@@ -1,4 +1,4 @@
-# Immutable Infrastructure Rollout – Blue-Green Deployment
+# Blue-Green Deployment
 
 <img width="400" height="300" alt="image" src="https://github.com/user-attachments/assets/5c6b1ab1-7359-42b4-8b77-f54b51ac00d4" />
 
