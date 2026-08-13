@@ -12,22 +12,21 @@
 
 ## Table of Contents
 
-1. [Introduction](#1-introduction)
-2. [Objective](#2-objective)
-3. [Blue-Green Infrastructure Flowchart](#3-blue-green-infrastructure-flowchart)
-4. [Step-by-Step Manual Rollout via AWS Console](#4-step-by-step-manual-rollout-via-aws-console)
-   4.1 [Stage 1: Provision Initial Active Environment (Blue Only)](#41-stage-1-provision-initial-active-environment-blue-only)
-   4.2 [Stage 2: Introduce and Provision the Green Environment](#42-stage-2-introduce-and-provision-the-green-environment)
-   4.3 [Stage 3: Health Status Check Verification](#43-stage-3-health-status-check-verification)
-   4.4 [Stage 4: Shift Traffic to Green (Update ALB Listener Rule)](#44-stage-4-shift-traffic-to-green-update-alb-listener-rule)
-   4.5 [Stage 5: Scale Down Blue Environment](#45-stage-5-scale-down-blue-environment)
-5. [Rollout and Rollback Strategy (AWS Console)](#5-rollout-and-rollback-strategy-aws-console)
-   5.1 [Achieving the Rollout (Deployment Flow)](#51-achieving-the-rollout-deployment-flow)
-   5.2 [Reverting the Rollout (Rollback Flow)](#52-reverting-the-rollout-rollback-flow)
-6. [FAQs](#6-faqs)
-7. [Contact Information](#7-contact-information)
-8. [References](#8-references)
-    
+1. [Introduction](https://github.com/bhawnadangarh/sprint_5/blob/main/Blue-Green%20Deployment.md#1-introduction)
+2. [Objective](https://github.com/bhawnadangarh/sprint_5/blob/main/Blue-Green%20Deployment.md#2-objective)
+3. [Blue-Green Infrastructure Flowchart](https://github.com/bhawnadangarh/sprint_5/blob/main/Blue-Green%20Deployment.md#3-blue-green-infrastructure-flowchart)
+4. [Step-by-Step Manual Rollout via AWS Console](https://github.com/bhawnadangarh/sprint_5/blob/main/Blue-Green%20Deployment.md#4-step-by-step-manual-rollout-via-aws-console)  
+   4.1 [Stage 1: Provision Initial Active Environment (Blue Only)](https://github.com/bhawnadangarh/sprint_5/blob/main/Blue-Green%20Deployment.md#41-stage-1-provision-initial-active-environment-blue-only)  
+   4.2 [Stage 2: Introduce and Provision the Green Environment](https://github.com/bhawnadangarh/sprint_5/blob/main/Blue-Green%20Deployment.md#42-stage-2-introduce-and-provision-the-green-environment)  
+   4.3 [Stage 3: Health Status Check Verification](https://github.com/bhawnadangarh/sprint_5/blob/main/Blue-Green%20Deployment.md#43-stage-3-health-status-check-verification)  
+   4.4 [Stage 4: Shift Traffic to Green (Update ALB Listener Rule)](https://github.com/bhawnadangarh/sprint_5/blob/main/Blue-Green%20Deployment.md#44-stage-4-shift-traffic-to-green-update-alb-listener-rule)  
+   4.5 [Stage 5: Scale Down Blue Environment](https://github.com/bhawnadangarh/sprint_5/blob/main/Blue-Green%20Deployment.md#45-stage-5-scale-down-blue-environment)
+5. [Rollout and Rollback Strategy (AWS Console)](https://github.com/bhawnadangarh/sprint_5/blob/main/Blue-Green%20Deployment.md#5-rollout-and-rollback-strategy-aws-console)  
+   5.1 [Achieving the Rollout (Deployment Flow)](https://github.com/bhawnadangarh/sprint_5/blob/main/Blue-Green%20Deployment.md#51-achieving-the-rollout-deployment-flow)  
+   5.2 [Reverting the Rollout (Rollback Flow)](https://github.com/bhawnadangarh/sprint_5/blob/main/Blue-Green%20Deployment.md#52-reverting-the-rollout-rollback-flow)
+6. [FAQs](https://github.com/bhawnadangarh/sprint_5/blob/main/Blue-Green%20Deployment.md#6-faqs)
+7. [Contact Information](https://github.com/bhawnadangarh/sprint_5/blob/main/Blue-Green%20Deployment.md#7-contact-information)
+8. [References](https://github.com/bhawnadangarh/sprint_5/blob/main/Blue-Green%20Deployment.md#8-references)
 ---
 
 ## 1. Introduction
