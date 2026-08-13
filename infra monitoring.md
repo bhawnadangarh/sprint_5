@@ -1,6 +1,6 @@
 # POC – Infrastructure Monitoring
 
-<img width="300" height="300" alt="infrastructure monitoring" src="https://github.com/user-attachments/assets/8b79c592-daaa-44cd-8150-1e51b1adff74" />
+<img width="400" height="300" alt="image" src="https://github.com/user-attachments/assets/e0a0f22e-98a0-4127-8dc6-53c47220ad32" />
 
 ---
 
