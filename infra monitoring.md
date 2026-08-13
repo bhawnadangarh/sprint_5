@@ -16,24 +16,29 @@
 
 1. [Introduction](#1-introduction)
 2. [Objective](#2-objective)
-3. [Step-by-Step Implementation](#3-step-by-step-implementation)  
-   3.1 [Install Node Exporter](#31-install-node-exporter)  
-   3.2 [Configure Prometheus Target](#32-configure-prometheus-target)  
-   3.3 [Install Grafana](#33-install-grafana)  
-   3.4 [Import Dashboard](#34-import-dashboard)  
-   3.5 [Configure Alerts](#35-configure-alerts)  
-4. [Commands Used](#4-commands-used)
-5. [Troubleshooting](#5-troubleshooting)
-6. [Contact Information](#6-contact-information)
-7. [References](#7-references)
+3. [Step-by-Step Implementation](#3-step-by-step-implementation)
+   - [3.1 Install Node Exporter](#31-install-node-exporter)
+   - [3.2 Install Prometheus](#32-install-prometheus)
+   - [3.3 Configure Prometheus Target](#33-configure-prometheus-target)
+   - [3.4 Install Grafana](#34-install-grafana)
+   - [3.5 Import Dashboard](#35-import-dashboard)
+   - [3.6 Configure Alerts](#36-configure-alerts)
+   - [3.7 Install and Configure Alertmanager](#37-install-and-configure-alertmanager)
+      - [3.7.1 Install Alertmanager](#371-install-alertmanager)
+      - [3.7.2 Verify Alertmanager](#372-verify-alertmanager)
+      - [3.7.3 Alertmanager Configuration](#373-alertmanager-configuration)
+      - [3.7.4 Connect Prometheus to Alertmanager](#374-connect-prometheus-to-alertmanager)
+      - [3.7.5 Alert Notification Received](#375-alert-notification-received)
+4. [Contact Information](#4-contact-information)
+5. [References](#5-references)
 
 ---
 
 ## 1. Introduction
 
-This document details a Proof of Concept (POC) demonstrating the automated collection, visualization, and alerting setup for key infrastructure metrics (CPU, Memory, Disk, and Network) using Prometheus Node Exporter, Prometheus Server, and Grafana.
+This document details a Proof of Concept (POC) demonstrating the automated collection, visualization, and alerting setup for key infrastructure metrics such as CPU, Memory, Disk, and Network using Prometheus Node Exporter, Prometheus Server, Grafana, and Alertmanager.
 
-Monitoring infrastructure health ensures that resource exhaustion is detected before causing application downtime.
+Monitoring infrastructure health helps identify resource-related issues before they cause application downtime.
 
 ---
 
@@ -43,7 +48,8 @@ Monitoring infrastructure health ensures that resource exhaustion is detected be
 - Configure Prometheus to pull metrics at regular scrape intervals.
 - Visualize system performance using Grafana dashboards.
 - Set up alerting rules for high CPU, low memory, and disk space saturation.
-- Test endpoint metrics scrape target success.
+- Configure email notifications for infrastructure alerts.
+- Test endpoint metrics and alerting functionality.
 
 ---
 
@@ -58,27 +64,28 @@ wget https://github.com/prometheus/node_exporter/releases/download/v1.7.0/node_e
 tar -xvf node_exporter-1.7.0.linux-amd64.tar.gz
 cd node_exporter-1.7.0.linux-amd64
 ./node_exporter &
-```
+````
+
 <img width="1919" height="849" alt="image" src="https://github.com/user-attachments/assets/27a1f086-48f2-4cc0-832d-0ff894271caa" />
 
-Verify that metrics are being exposed locally on port 9100:
+Verify that metrics are being exposed locally on port `9100`:
 
 ```bash
 curl http://localhost:9100/metrics
 ```
+
 <img width="1662" height="721" alt="image" src="https://github.com/user-attachments/assets/41c40ec3-db6b-4f9e-9cf2-66587a0327da" />
 
-
+---
 
 ### 3.2 Install Prometheus
 
-Install and start Prometheus on the monitoring server.
+Install Prometheus on the monitoring server.
 
 ```bash
 sudo apt update
 sudo apt install -y prometheus
-````
-
+```
 
 Verify the Prometheus service:
 
@@ -91,16 +98,16 @@ Verify that Prometheus is running on port `9090`:
 ```bash
 curl http://localhost:9090/-/ready
 ```
-<img width="1919" height="467" alt="image" src="https://github.com/user-attachments/assets/6a83ac4e-de13-4c6b-98f0-2cc6ff9338e7" />
 
+<img width="1919" height="467" alt="image" src="https://github.com/user-attachments/assets/6a83ac4e-de13-4c6b-98f0-2cc6ff9338e7" />
 
 <img width="1917" height="736" alt="image" src="https://github.com/user-attachments/assets/7998aa3b-797d-4854-9e31-f09b8c86bcb6" />
 
 ---
 
-### 3.2 Configure Prometheus Target
+### 3.3 Configure Prometheus Target
 
-Add the Node Exporter target to your Prometheus server configuration file (`prometheus.yml`).
+Add the Node Exporter target to the Prometheus server configuration file (`prometheus.yml`).
 
 ```yaml
 scrape_configs:
@@ -111,52 +118,57 @@ scrape_configs:
 
 ---
 
-### 3.3 Install Grafana
+### 3.4 Install Grafana
 
 Install and start the Grafana visualization server.
 
 ```bash
 sudo apt-get install -y apt-transport-https software-properties-common wget
+
 wget -q -O - https://packages.grafana.com/gpg.key | gpg --dearmor | sudo tee /usr/share/keyrings/grafana.gpg > /dev/null
 
 echo "deb [signed-by=/usr/share/keyrings/grafana.gpg] https://packages.grafana.com/oss/deb stable main" | sudo tee -a /etc/apt/sources.list.d/grafana.list
 
 sudo apt-get update
 sudo apt-get install -y grafana
-
-
 ```
+
 <img width="1919" height="490" alt="image" src="https://github.com/user-attachments/assets/848f8300-ab62-43b1-9263-d0e41942e6c7" />
+
 <img width="1919" height="572" alt="image" src="https://github.com/user-attachments/assets/b72cd847-95e1-4942-8579-21019645adef" />
 
 ---
 
-### 3.4 Import Dashboard
+### 3.5 Import Dashboard
 
-Log in to Grafana (port 3000), add Prometheus as a Data Source, and import the standard Node Exporter Dashboard (ID: `1860`).
+Log in to Grafana on port `3000`, add Prometheus as a Data Source, and import the standard Node Exporter Dashboard (ID: `1860`).
 
-1. Navigate to **Connections -> Data Sources** -> Click **Add data source** -> Select **Prometheus**.
-2. Set URL to `http://localhost:9090` and click **Save & test**.
-3. Go to **Dashboards -> New -> Import**.
-4. Enter Dashboard ID `1860` and select the Prometheus datasource.
+1. Navigate to **Connections → Data Sources** → Click **Add data source** → Select **Prometheus**.
+2. Set the URL to `http://localhost:9090` and click **Save & Test**.
+3. Go to **Dashboards → New → Import**.
+4. Enter Dashboard ID `1860` and select the Prometheus data source.
 
 <img width="1912" height="965" alt="image" src="https://github.com/user-attachments/assets/a3c1269c-c6ef-4c27-8107-d85f0bf825bf" />
+
 <img width="1918" height="965" alt="image" src="https://github.com/user-attachments/assets/bcafa37b-1b22-48a7-8d00-8be44125d957" />
 
 <img width="1919" height="952" alt="image" src="https://github.com/user-attachments/assets/594ceffc-3f3f-4f9f-9d09-77e2570eb750" />
+
 <img width="1918" height="967" alt="image" src="https://github.com/user-attachments/assets/be837b54-42de-4c96-a0cb-7fd645153e1c" />
 
 ---
 
-### 3.5 Configure Alerts
+### 3.6 Configure Alerts
 
-Add infrastructure alert rules to your Prometheus configuration (e.g. `alert.rules.yml`).
+Add infrastructure alert rules to the Prometheus configuration using `alert.rules.yml`.
 
-```
+Create the alert rules file:
 
+```bash
 sudo vim /etc/prometheus/alert.rules.yml
-
 ```
+
+Add the following alert rules:
 
 ```yaml
 groups:
@@ -183,21 +195,28 @@ groups:
           description: "Available memory is < 10%. Current availability is {{ $value | printf \"%.2f\" }}%."
 ```
 
-### 3.6 Install and Configure Alertmanager
+---
+
+### 3.7 Install and Configure Alertmanager
 
 Alertmanager receives alerts from Prometheus and sends notifications such as email alerts.
 
 Install Alertmanager on the same monitoring server where Prometheus is running.
 
-#### Install Alertmanager
+#### 3.7.1 Install Alertmanager
+
+Install Alertmanager:
 
 ```bash
 sudo apt update
 sudo apt install -y prometheus-alertmanager
-````
+```
+
 <img width="1919" height="963" alt="image" src="https://github.com/user-attachments/assets/5fa5ae93-df31-4b09-9dda-a2e0b22966a8" />
 
-#### Verify Alertmanager
+#### 3.7.2 Verify Alertmanager
+
+Verify the Alertmanager service:
 
 ```bash
 sudo systemctl status prometheus-alertmanager
@@ -205,17 +224,17 @@ sudo systemctl status prometheus-alertmanager
 
 <img width="1887" height="542" alt="image" src="https://github.com/user-attachments/assets/f1defbd5-760d-4c60-b367-019c08a29486" />
 
-
-#### Alertmanager Configuration
+#### 3.7.3 Alertmanager Configuration
 
 The Alertmanager configuration file is:
 
 ```bash
 sudo vim /etc/prometheus/alertmanager.yml
-
 ```
 
-```
+Configure the SMTP and email receiver settings:
+
+```yaml
 global:
   smtp_smarthost: 'smtp.gmail.com:587'
   smtp_from: 'bhavna123porwal@gmail.com'
@@ -229,51 +248,116 @@ receivers:
   - name: 'email-notification'
     email_configs:
       - to: 'bhavna123porwal@gmail.com'
-
 ```
 
-#### Connect Prometheus to Alertmanager
+> Use a Gmail App Password for `smtp_auth_password`. Do not use the normal Gmail account password.
 
-Edit
-```
+#### 3.7.4 Connect Prometheus to Alertmanager
+
+Edit the Prometheus configuration file:
+
+```bash
 sudo vim /etc/prometheus/prometheus.yml
+```
 
-```
-```
+Configure the alert rules file:
+
+```yaml
 rule_files:
   - "/etc/prometheus/alert.rules.yml"
-
 ```
 
+Configure Alertmanager as the alert receiver:
+
+```yaml
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+            - localhost:9093
 ```
- sudo vim /etc/default/prometheus-alertmanager
+
+Configure the Alertmanager service to use the required configuration file:
+
+```bash
+sudo vim /etc/default/prometheus-alertmanager
 ```
-```
+
+Set:
+
+```bash
 ARGS="--config.file=/etc/prometheus/alertmanager.yml"
-
 ```
 
-###  Alert Notification Received
+Validate the Alertmanager configuration:
 
-<img width="1919" height="939" alt="image" src="https://github.com/user-attachments/assets/dd37b6d5-0843-4b55-9edc-940598d6fdf7" />
+```bash
+sudo amtool check-config /etc/prometheus/alertmanager.yml
+```
 
+Restart Alertmanager:
 
+```bash
+sudo systemctl restart prometheus-alertmanager
+```
 
-## 6. Contact Information
+Restart Prometheus to load the updated configuration:
 
-| Name | Email |
-| --- | --- |
+```bash
+sudo systemctl restart prometheus
+```
+
+Verify the services:
+
+```bash
+sudo systemctl status prometheus-alertmanager
+sudo systemctl status prometheus
+```
+
+#### 3.7.5 Alert Notification Received
+
+After the CPU threshold is exceeded for the configured duration, Prometheus triggers the alert and Alertmanager sends an email notification.
+
+Example CPU stress command used for testing:
+
+```bash
+stress --cpu 1 --timeout 180
+```
+
+The alert flow is:
+
+```text
+CPU Usage > 85%
+       ↓
+Prometheus Alert Rule
+       ↓
+Alertmanager
+       ↓
+Gmail SMTP
+       ↓
+Email Notification
+```
+
+<img width="1919" height="939" alt="image" src="https://github.com/user-attachments/assets/dd37b6d5-0843-4b09-9dda-a2e0b22966f7" />
+
+---
+
+## 4. Contact Information
+
+| Name           | Email                                                                                 |
+| -------------- | ------------------------------------------------------------------------------------- |
 | Bhawna Dangarh | [bhawna.dangarh.snaatak@mygurukulam.co](mailto:bhawna.dangarh.snaatak@mygurukulam.co) |
 
 ---
 
-## 7. References
+## 5. References
 
-| Description | Link |
-| --- | --- |
-| Node Exporter GitHub Repository | [https://github.com/prometheus/node_exporter](https://github.com/prometheus/node_exporter) |
+| Description                     | Link                                                                                                                                                   |
+| ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Node Exporter GitHub Repository | [https://github.com/prometheus/node_exporter](https://github.com/prometheus/node_exporter)                                                             |
 | Prometheus Scrape Configuration | [https://prometheus.io/docs/prometheus/latest/configuration/configuration/](https://prometheus.io/docs/prometheus/latest/configuration/configuration/) |
-| Grafana Dashboard Library | [https://grafana.com/grafana/dashboards/](https://grafana.com/grafana/dashboards/) |
-| Prometheus Rule Checking Guide | [https://prometheus.io/docs/prometheus/latest/command-line/promtool/](https://prometheus.io/docs/prometheus/latest/command-line/promtool/) |
+| Grafana Dashboard Library       | [https://grafana.com/grafana/dashboards/](https://grafana.com/grafana/dashboards/)                                                                     |
+| Prometheus Rule Checking Guide  | [https://prometheus.io/docs/prometheus/latest/command-line/promtool/](https://prometheus.io/docs/prometheus/latest/command-line/promtool/)             |
 
 ---
+
