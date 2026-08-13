@@ -239,6 +239,14 @@ rule_files:
 
 ```
 
+```
+ sudo vim /etc/default/prometheus-alertmanager
+```
+```
+ARGS="--config.file=/etc/prometheus/alertmanager.yml"
+
+```
+
 ## 6. Contact Information
 
 | Name | Email |
