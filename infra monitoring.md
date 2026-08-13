@@ -176,6 +176,42 @@ groups:
           description: "Available memory is < 10%. Current availability is {{ $value | printf \"%.2f\" }}%."
 ```
 
+### 3.6 Install and Configure Alertmanager
+
+Alertmanager receives alerts from Prometheus and sends notifications such as email alerts.
+
+Install Alertmanager on the same monitoring server where Prometheus is running.
+
+#### Install Alertmanager
+
+```bash
+sudo apt update
+sudo apt install -y prometheus-alertmanager
+````
+
+#### Verify Alertmanager
+
+```bash
+sudo systemctl status prometheus-alertmanager
+```
+
+<img width="1887" height="542" alt="image" src="https://github.com/user-attachments/assets/f1defbd5-760d-4c60-b367-019c08a29486" />
+
+
+#### Alertmanager Configuration
+
+The Alertmanager configuration file is:
+
+```bash
+/etc/alertmanager/alertmanager.yml
+```
+
+<img width="1919" height="963" alt="image" src="https://github.com/user-attachments/assets/5fa5ae93-df31-4b09-9dda-a2e0b22966a8" />
+
+
+
+
+
 
 ## 6. Contact Information
 
