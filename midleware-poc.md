@@ -133,6 +133,35 @@ Start the Prometheus service:
 
 ---
 
+
+
+### 3.4 Install Grafana
+
+Install and start the Grafana visualization server.
+
+```bash
+sudo apt-get install -y apt-transport-https software-properties-common wget
+
+wget -q -O - https://packages.grafana.com/gpg.key | gpg --dearmor | sudo tee /usr/share/keyrings/grafana.gpg > /dev/null
+
+echo "deb [signed-by=/usr/share/keyrings/grafana.gpg] https://packages.grafana.com/oss/deb stable main" | sudo tee -a /etc/apt/sources.list.d/grafana.list
+
+sudo apt-get update
+sudo apt-get install -y grafana
+
+
+sudo systemctl enable grafana-server
+sudo systemctl start grafana-server
+sudo systemctl status grafana-server
+```
+
+<img width="1919" height="967" alt="image" src="https://github.com/user-attachments/assets/6f756ca4-55bf-4614-b98e-d05b70a86d41" />
+
+<img width="1919" height="732" alt="image" src="https://github.com/user-attachments/assets/361507bc-90f0-439e-af0b-088eec3d2801" />
+
+
+
+
 ### 3.4 Import Dashboard
 
 Log in to Grafana, add Prometheus as a Data Source, and import the Redis Dashboard (ID: `763`).
