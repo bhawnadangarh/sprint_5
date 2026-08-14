@@ -155,11 +155,25 @@ sudo systemctl start grafana-server
 sudo systemctl status grafana-server
 ```
 
-<img width="1919" height="967" alt="image" src="https://github.com/user-attachments/assets/6f756ca4-55bf-4614-b98e-d05b70a86d41" />
+<img width="1919" height="694" alt="image" src="https://github.com/user-attachments/assets/46d4eede-00ed-4626-befc-7949f8e3e2d0" />
+<img width="1918" height="599" alt="image" src="https://github.com/user-attachments/assets/cddb2986-1ce2-48e4-8572-e95f8e40cbcb" />
 
-<img width="1919" height="732" alt="image" src="https://github.com/user-attachments/assets/361507bc-90f0-439e-af0b-088eec3d2801" />
 
+## Grafana Login
 
+Open the following URL in your browser:
+
+```text
+http://<EC2-PUBLIC-IP>:3000
+```
+
+Example:
+
+```text
+http://54.160.238.4:3000
+```
+
+<img width="1919" height="966" alt="image" src="https://github.com/user-attachments/assets/7f38feae-7447-4b27-beb0-912c9d4de2f8" />
 
 
 ### 3.4 Import Dashboard
@@ -169,6 +183,8 @@ Log in to Grafana, add Prometheus as a Data Source, and import the Redis Dashboa
 1. Add your Prometheus datasource url `http://localhost:9090`.
 2. Go to **Dashboards -> Import**.
 3. Enter Dashboard ID `763` and choose the Prometheus datasource.
+
+<img width="1919" height="945" alt="image" src="https://github.com/user-attachments/assets/ab7dcc3a-e964-46bd-b93f-fe4384031cd1" />
 
 ---
 
