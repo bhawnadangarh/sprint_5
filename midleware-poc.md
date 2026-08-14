@@ -1,3 +1,4 @@
+````md
 # POC – Redis Monitoring
 
 <img width="400" height="300" alt="image" src="https://github.com/user-attachments/assets/4a056ad5-d2a6-401e-8082-33c391b3c505" />
@@ -21,12 +22,13 @@
    3.1 [Install and Start Redis](#31-install-and-start-redis)  
    3.2 [Install Redis Exporter](#32-install-redis-exporter)  
    3.3 [Install and Configure Prometheus](#33-install-and-configure-prometheus)  
-   3.4 [Import Dashboard](#34-import-dashboard)  
-   3.5 [Configure Alerts](#35-configure-alerts)
-4. Alert Notification Received
-5. FAQ`s
-6. [Contact Information](#5-contact-information)
-7. [References](#6-references)
+   3.4 [Install Grafana](#34-install-grafana)  
+   3.5 [Import Dashboard](#35-import-dashboard)  
+   3.6 [Configure Alerts](#36-configure-alerts)
+4. [Alert Notification Received](#4-alert-notification-received)
+5. [FAQs](#5-faqs)
+6. [Contact Information](#6-contact-information)
+7. [References](#7-references)
 
 ---
 
@@ -57,14 +59,14 @@ Install Redis server on the Linux instance.
 ```bash
 sudo apt-get update
 sudo apt-get install -y redis-server
-```
-
+````
 
 Verify service is up:
 
 ```bash
 redis-cli ping
 ```
+
 <img width="1919" height="403" alt="image" src="https://github.com/user-attachments/assets/4bc9ed7e-0788-4975-a67a-944e7c23d383" />
 <img width="1642" height="306" alt="image" src="https://github.com/user-attachments/assets/edca53e1-c5e3-4dd8-b793-3195c6b4eb2b" />
 
@@ -86,6 +88,7 @@ Verify metrics are exposed on port 9121:
 ```bash
 curl http://localhost:9121/metrics
 ```
+
 <img width="1919" height="958" alt="image" src="https://github.com/user-attachments/assets/50c1d113-f9fc-40ae-a0f9-2a4af71bf1b9" />
 
 ## Start Redis Exporter
@@ -105,6 +108,7 @@ wget https://github.com/prometheus/prometheus/releases/download/v2.45.0/promethe
 tar -xvf prometheus-2.45.0.linux-amd64.tar.gz
 cd prometheus-2.45.0.linux-amd64
 ```
+
 <img width="1919" height="630" alt="image" src="https://github.com/user-attachments/assets/3677f0cc-548b-493e-bb69-b2ed4a79980e" />
 
 Configure `prometheus.yml` to scrape the Redis Exporter targets and route alerts to Alertmanager:
@@ -136,11 +140,10 @@ Start the Prometheus service:
 ```bash
 ./prometheus --config.file=prometheus.yml &
 ```
+
 <img width="1919" height="745" alt="image" src="https://github.com/user-attachments/assets/af660a1f-6056-4cc0-84ac-0dc46f4f9670" />
 
 ---
-
-
 
 ### 3.4 Install Grafana
 
@@ -165,7 +168,6 @@ sudo systemctl status grafana-server
 <img width="1919" height="694" alt="image" src="https://github.com/user-attachments/assets/46d4eede-00ed-4626-befc-7949f8e3e2d0" />
 <img width="1918" height="599" alt="image" src="https://github.com/user-attachments/assets/cddb2986-1ce2-48e4-8572-e95f8e40cbcb" />
 
-
 ## Grafana Login
 
 Open the following URL in your browser:
@@ -182,8 +184,7 @@ http://54.160.238.4:3000
 
 <img width="1919" height="966" alt="image" src="https://github.com/user-attachments/assets/7f38feae-7447-4b27-beb0-912c9d4de2f8" />
 
-
-### 3.4 Import Dashboard
+### 3.5 Import Dashboard
 
 Log in to Grafana, add Prometheus as a Data Source, and import the Redis Dashboard (ID: `763`).
 
@@ -195,7 +196,7 @@ Log in to Grafana, add Prometheus as a Data Source, and import the Redis Dashboa
 
 ---
 
-### 3.5 Configure Alerts
+### 3.6 Configure Alerts
 
 1. Create a Prometheus alerting rules file named `redis.alerts.yml`:
 
@@ -228,7 +229,6 @@ Verify alert rules syntax:
 
 ```bash
 ./promtool check rules redis.alerts.yml
-
 ```
 
 2. Download and install Alertmanager:
@@ -238,8 +238,8 @@ wget https://github.com/prometheus/alertmanager/releases/download/v0.27.0/alertm
 tar -xvf alertmanager-0.27.0.linux-amd64.tar.gz
 cd alertmanager-0.27.0.linux-amd64
 ```
-<img width="1919" height="893" alt="image" src="https://github.com/user-attachments/assets/7165fe90-bdd5-4218-8770-72edc6c6f1d6" />
 
+<img width="1919" height="893" alt="image" src="https://github.com/user-attachments/assets/7165fe90-bdd5-4218-8770-72edc6c6f1d6" />
 
 3. Create the Alertmanager configuration file `alertmanager.yml` to route alerts to email:
 
@@ -264,40 +264,44 @@ receivers:
 ```bash
 ./alertmanager --config.file=alertmanager.yml &
 ```
+
 ---
-5. Alert Notification Received
+
+## 4. Alert Notification Received
 
 <img width="1919" height="934" alt="image" src="https://github.com/user-attachments/assets/d4443fe0-5c8d-43e9-b6ee-58b8607b9329" />
 
 ---
 
-## FAQs
+## 5. FAQs
 
-| # | FAQ | Answer |
-|---|---|---|
-| 1 | What is Redis Exporter? | It exposes Redis metrics for Prometheus. |
-| 2 | Which metrics are monitored? | Memory, clients, keys, commands, and evictions. |
-| 3 | What is Prometheus used for? | It collects and stores Redis metrics. |
-| 4 | What is Grafana used for? | It visualizes Redis metrics through dashboards. |
+| # | FAQ                            | Answer                                                                 |
+| - | ------------------------------ | ---------------------------------------------------------------------- |
+| 1 | What is Redis Exporter?        | It exposes Redis metrics for Prometheus.                               |
+| 2 | Which metrics are monitored?   | Memory, clients, keys, commands, and evictions.                        |
+| 3 | What is Prometheus used for?   | It collects and stores Redis metrics.                                  |
+| 4 | What is Grafana used for?      | It visualizes Redis metrics through dashboards.                        |
 | 5 | How are Redis alerts notified? | Prometheus triggers alerts and Alertmanager sends email notifications. |
 
 ---
 
-
 ## 6. Contact Information
 
-| Name | Email |
-| --- | --- |
+| Name           | Email                                                                                 |
+| -------------- | ------------------------------------------------------------------------------------- |
 | Bhawna Dangarh | [bhawna.dangarh.snaatak@mygurukulam.co](mailto:bhawna.dangarh.snaatak@mygurukulam.co) |
 
 ---
 
 ## 7. References
 
-| Description | Link |
-| --- | --- |
+| Description                      | Link                                                                                       |
+| -------------------------------- | ------------------------------------------------------------------------------------------ |
 | Redis Exporter GitHub Repository | [https://github.com/oliver006/redis_exporter](https://github.com/oliver006/redis_exporter) |
-| Redis Configuration Guide | [https://redis.io/docs/management/config/](https://redis.io/docs/management/config/) |
-| Grafana Redis Dashboard Page | [https://grafana.com/grafana/dashboards/763](https://grafana.com/grafana/dashboards/763) |
+| Redis Configuration Guide        | [https://redis.io/docs/management/config/](https://redis.io/docs/management/config/)       |
+| Grafana Redis Dashboard Page     | [https://grafana.com/grafana/dashboards/763](https://grafana.com/grafana/dashboards/763)   |
 
 ---
+
+```
+```
