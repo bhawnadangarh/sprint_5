@@ -16,7 +16,7 @@
 ## Table of Contents
 
 1. [Introduction](#1-introduction)
-2. [Objective](#2-objective)
+2. [Purpose](#2-purpose)
 3. [Step-by-Step Implementation](#3-step-by-step-implementation)  
    3.1 [Install and Start Redis](#31-install-and-start-redis)  
    3.2 [Install Redis Exporter](#32-install-redis-exporter)  
@@ -41,16 +41,21 @@ The POC focuses on key Redis metrics such as **memory usage, connected clients, 
 
 ---
 
-## 2. Objective
+## 2. Purpose
 
-The objective of this POC is to establish a complete Redis monitoring and alerting setup that can:
+The purpose of this POC is to demonstrate how Redis can be monitored using **Redis Exporter, Prometheus, Grafana, and Alertmanager**.
 
-- Monitor Redis health and performance metrics.
-- Export Redis metrics to Prometheus using Redis Exporter.
-- Collect and evaluate metrics using Prometheus.
-- Visualize Redis metrics through Grafana dashboards.
-- Configure alerts for high memory usage and excessive client connections.
-- Send email notifications through Alertmanager when alert conditions are met.
+Redis monitoring helps track key performance and health metrics, including:
+
+- **Memory Usage** – Monitors Redis memory consumption and utilization.
+- **Connected Clients** – Tracks the number of active Redis client connections.
+- **Commands** – Monitors Redis command activity and requests per second.
+- **Keys** – Tracks the number of keys stored in Redis.
+- **Evictions and Expired Keys** – Helps identify keys removed due to memory limits or expiration.
+- **Network I/O** – Monitors Redis network activity.
+- **Alerts** – Detects critical conditions such as high memory usage and excessive client connections and sends notifications through Alertmanager.
+
+This POC provides a complete monitoring flow from **Redis metrics collection to visualization and alert notification**.
 
 ---
 
