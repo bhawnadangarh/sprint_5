@@ -237,29 +237,25 @@ wget https://github.com/prometheus/alertmanager/releases/download/v0.27.0/alertm
 tar -xvf alertmanager-0.27.0.linux-amd64.tar.gz
 cd alertmanager-0.27.0.linux-amd64
 ```
+<img width="1919" height="893" alt="image" src="https://github.com/user-attachments/assets/7165fe90-bdd5-4218-8770-72edc6c6f1d6" />
+
 
 3. Create the Alertmanager configuration file `alertmanager.yml` to route alerts to email:
 
 ```yaml
 global:
   smtp_smarthost: 'smtp.gmail.com:587'
-  smtp_from: 'alertmanager@mygurukulam.co'
-  smtp_auth_username: 'alertmanager@mygurukulam.co'
-  smtp_auth_password: 'your-secure-smtp-password-or-app-password'
-  smtp_require_tls: true
+  smtp_from: 'bhavna123porwal@gmail.com'
+  smtp_auth_username: 'bhavna123porwal@gmail.com'
+  smtp_auth_password: 'NEW_APP_PASSWORD'
 
 route:
-  group_by: ['alertname', 'instance']
-  group_wait: 30s
-  group_interval: 5m
-  repeat_interval: 12h
-  receiver: 'email-receiver'
+  receiver: 'email-notification'
 
 receivers:
-  - name: 'email-receiver'
+  - name: 'email-notification'
     email_configs:
-      - to: 'bhawna.dangarh.snaatak@mygurukulam.co'
-        send_resolved: true
+      - to: 'bhavna123porwal@gmail.com'
 ```
 
 4. Start Alertmanager:
