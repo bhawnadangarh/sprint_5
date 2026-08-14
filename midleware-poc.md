@@ -1,4 +1,3 @@
-````md
 # POC – Redis Monitoring
 
 <img width="400" height="300" alt="image" src="https://github.com/user-attachments/assets/4a056ad5-d2a6-401e-8082-33c391b3c505" />
@@ -303,5 +302,4 @@ receivers:
 
 ---
 
-```
-```
+
