@@ -291,50 +291,12 @@ Validate the Alertmanager configuration:
 sudo amtool check-config /etc/prometheus/alertmanager.yml
 ```
 
-Restart Alertmanager:
-
-```bash
-sudo systemctl restart prometheus-alertmanager
-```
-
-Restart Prometheus to load the updated configuration:
-
-```bash
-sudo systemctl restart prometheus
-```
-
-Verify the services:
-
-```bash
-sudo systemctl status prometheus-alertmanager
-sudo systemctl status prometheus
-```
-
 #### 3.7.5 Alert Notification Received
 
 After the CPU threshold is exceeded for the configured duration, Prometheus triggers the alert and Alertmanager sends an email notification.
 
-Example CPU stress command used for testing:
-
-```bash
-stress --cpu 1 --timeout 180
-```
 <img width="1918" height="967" alt="image" src="https://github.com/user-attachments/assets/be837b54-42de-4c96-a0cb-7fd645153e1c" />
 
-
-The alert flow is:
-
-```text
-CPU Usage > 85%
-       ↓
-Prometheus Alert Rule
-       ↓
-Alertmanager
-       ↓
-Gmail SMTP
-       ↓
-Email Notification
-```
 
 <img width="1918" height="963" alt="image" src="https://github.com/user-attachments/assets/bbf0f3f5-1958-4379-8895-b918d989429d" />
 
