@@ -1,6 +1,7 @@
 # POC – Redis Monitoring
 
-<img width="300" height="300" alt="redis monitoring" src="https://github.com/user-attachments/assets/8b79c592-daaa-44cd-8150-1e51b1adff74" />
+<img width="400" height="300" alt="image" src="https://github.com/user-attachments/assets/f378a471-697c-4dbb-aa6b-adf13dfd6d59" />
+
 
 ---
 
@@ -21,11 +22,11 @@
    3.2 [Install Redis Exporter](#32-install-redis-exporter)  
    3.3 [Install and Configure Prometheus](#33-install-and-configure-prometheus)  
    3.4 [Import Dashboard](#34-import-dashboard)  
-   3.5 [Configure Alerts](#35-configure-alerts)  
-4. [Commands Used](#4-commands-used)
-5. [Troubleshooting](#5-troubleshooting)
-6. [Contact Information](#6-contact-information)
-7. [References](#7-references)
+   3.5 [Configure Alerts](#35-configure-alerts)
+4. Alert Notification Received
+5. FAQ`s
+6. [Contact Information](#5-contact-information)
+7. [References](#6-references)
 
 ---
 
@@ -258,41 +259,30 @@ receivers:
       - to: 'bhavna123porwal@gmail.com'
 ```
 
-4. Start Alertmanager:
+### Start Alertmanager:
 
 ```bash
 ./alertmanager --config.file=alertmanager.yml &
 ```
+---
+5. Alert Notification Received
+
+<img width="1919" height="934" alt="image" src="https://github.com/user-attachments/assets/d4443fe0-5c8d-43e9-b6ee-58b8607b9329" />
 
 ---
 
-## 4. Commands Used
+## FAQs
 
-| Command | Description |
-| --- | --- |
-| `sudo apt-get install redis-server` | Installs Redis package on the host |
-| `redis-cli ping` | Verifies Redis engine connection |
-| `./redis_exporter ... &` | Launches Redis exporter background daemon |
-| `curl http://localhost:9121/metrics` | Queries exposed Redis exporter metrics |
-| `./prometheus ... &` | Launches Prometheus server in background |
-| `promtool check rules <file>` | Validates YAML syntax of Prometheus alerts |
-| `./alertmanager ... &` | Launches Alertmanager background daemon |
-| `curl -X POST .../-/reload` | Dynamically reloads Prometheus settings |
+| # | FAQ | Answer |
+|---|---|---|
+| 1 | What is Redis Exporter? | It exposes Redis metrics for Prometheus. |
+| 2 | Which metrics are monitored? | Memory, clients, keys, commands, and evictions. |
+| 3 | What is Prometheus used for? | It collects and stores Redis metrics. |
+| 4 | What is Grafana used for? | It visualizes Redis metrics through dashboards. |
+| 5 | How are Redis alerts notified? | Prometheus triggers alerts and Alertmanager sends email notifications. |
 
 ---
 
-## 5. Troubleshooting
-
-| Issue | Solution |
-| --- | --- |
-| Redis Exporter shows scraper errors | Ensure Redis connection string is correct and Redis is running |
-| Grafana shows "No Data" for memory | Ensure `maxmemory` is configured in `/etc/redis/redis.conf` to avoid divide-by-zero |
-| Exporter port conflict | Configure alternative port using `-web.listen-address` flag if port 9121 is busy |
-| Authentication failure | Pass password using `-redis.password` flag if Redis requires auth |
-| Alertmanager not receiving alerts | Ensure the `alertmanagers` target is configured under `alerting` in `prometheus.yml` and port 9093 is open |
-| Email notifications failing | Verify SMTP host, credentials, TLS configuration, and check Alertmanager log output |
-
----
 
 ## 6. Contact Information
 
