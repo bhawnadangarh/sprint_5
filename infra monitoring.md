@@ -336,7 +336,7 @@ Gmail SMTP
 Email Notification
 ```
 
-<img width="1919" height="939" alt="image" src="https://github.com/user-attachments/assets/dd37b6d5-0843-4b09-9dda-a2e0b22966f7" />
+<img width="1918" height="963" alt="image" src="https://github.com/user-attachments/assets/bbf0f3f5-1958-4379-8895-b918d989429d" />
 
 ---
 
