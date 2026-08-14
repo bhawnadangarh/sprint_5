@@ -33,19 +33,24 @@
 
 ## 1. Introduction
 
-This document details a Proof of Concept (POC) demonstrating the collection, visualization, and alerting setup for Redis database metrics (Memory Usage, Connected Clients, Evictions, and Expired Keys) using Prometheus Redis Exporter and Grafana.
+This Proof of Concept (POC) demonstrates end-to-end Redis monitoring using **Redis Exporter, Prometheus, Grafana, and Alertmanager**.
 
-Monitoring Redis is critical to prevent caching exhaustion and ensure backend response times remain optimal.
+Redis Exporter exposes Redis metrics in Prometheus format, Prometheus collects and evaluates these metrics, and Grafana provides a visual dashboard for monitoring Redis performance. Alertmanager is used to send notifications when defined Redis thresholds are exceeded.
+
+The POC focuses on key Redis metrics such as **memory usage, connected clients, commands, keys, and network activity**, along with alerting for critical conditions.
 
 ---
 
 ## 2. Objective
 
-- Set up a running Redis instance.
-- Deploy Prometheus Redis Exporter to translate Redis INFO metrics into Prometheus format.
-- Configure Prometheus to pull metrics from Redis Exporter.
-- Visualize caching performance using Grafana dashboard.
-- Establish alerts for high memory utilization and connection spikes.
+The objective of this POC is to establish a complete Redis monitoring and alerting setup that can:
+
+- Monitor Redis health and performance metrics.
+- Export Redis metrics to Prometheus using Redis Exporter.
+- Collect and evaluate metrics using Prometheus.
+- Visualize Redis metrics through Grafana dashboards.
+- Configure alerts for high memory usage and excessive client connections.
+- Send email notifications through Alertmanager when alert conditions are met.
 
 ---
 
@@ -263,6 +268,11 @@ receivers:
 ```bash
 ./alertmanager --config.file=alertmanager.yml &
 ```
+
+### Redis Memory Usage Alert
+
+<img width="1919" height="976" alt="image" src="https://github.com/user-attachments/assets/9c8ce7e4-6bd4-4908-8bb7-aa9422a1fd16" />
+
 
 ---
 
