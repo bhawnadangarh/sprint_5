@@ -87,6 +87,12 @@ curl http://localhost:9121/metrics
 ```
 <img width="1919" height="958" alt="image" src="https://github.com/user-attachments/assets/50c1d113-f9fc-40ae-a0f9-2a4af71bf1b9" />
 
+## Start Redis Exporter
+
+```bash
+./redis_exporter -redis.addr=redis://localhost:6379 &
+```
+
 ---
 
 ### 3.3 Install and Configure Prometheus
