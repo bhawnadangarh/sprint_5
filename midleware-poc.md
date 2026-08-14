@@ -98,6 +98,7 @@ wget https://github.com/prometheus/prometheus/releases/download/v2.45.0/promethe
 tar -xvf prometheus-2.45.0.linux-amd64.tar.gz
 cd prometheus-2.45.0.linux-amd64
 ```
+<img width="1919" height="630" alt="image" src="https://github.com/user-attachments/assets/3677f0cc-548b-493e-bb69-b2ed4a79980e" />
 
 Configure `prometheus.yml` to scrape the Redis Exporter targets and route alerts to Alertmanager:
 
@@ -128,6 +129,7 @@ Start the Prometheus service:
 ```bash
 ./prometheus --config.file=prometheus.yml &
 ```
+<img width="1919" height="745" alt="image" src="https://github.com/user-attachments/assets/af660a1f-6056-4cc0-84ac-0dc46f4f9670" />
 
 ---
 
