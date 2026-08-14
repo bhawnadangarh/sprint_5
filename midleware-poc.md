@@ -226,7 +226,8 @@ groups:
 Verify alert rules syntax:
 
 ```bash
-promtool check rules redis.alerts.yml
+./promtool check rules redis.alerts.yml
+
 ```
 
 2. Download and install Alertmanager:
