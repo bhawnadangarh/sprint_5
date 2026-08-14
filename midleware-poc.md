@@ -58,18 +58,14 @@ sudo apt-get update
 sudo apt-get install -y redis-server
 ```
 
-Start and enable the service:
-
-```bash
-sudo systemctl enable redis-server
-sudo systemctl start redis-server
-```
 
 Verify service is up:
 
 ```bash
 redis-cli ping
 ```
+<img width="1919" height="403" alt="image" src="https://github.com/user-attachments/assets/4bc9ed7e-0788-4975-a67a-944e7c23d383" />
+<img width="1642" height="306" alt="image" src="https://github.com/user-attachments/assets/edca53e1-c5e3-4dd8-b793-3195c6b4eb2b" />
 
 ---
 
@@ -89,6 +85,7 @@ Verify metrics are exposed on port 9121:
 ```bash
 curl http://localhost:9121/metrics
 ```
+<img width="1919" height="958" alt="image" src="https://github.com/user-attachments/assets/50c1d113-f9fc-40ae-a0f9-2a4af71bf1b9" />
 
 ---
 
