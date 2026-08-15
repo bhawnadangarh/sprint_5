@@ -116,6 +116,7 @@ Start the Promtail daemon:
 ```bash
 ./promtail-linux-amd64 -config.file=promtail-local-config.yaml &
 ```
+<img width="1919" height="208" alt="image" src="https://github.com/user-attachments/assets/a1faa285-7ea3-4253-bcd0-21c830370f76" />
 
 ---
 
