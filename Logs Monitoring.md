@@ -120,7 +120,46 @@ Start the Promtail daemon:
 
 ---
 
-### 3.3 Configure Grafana Loki Datasource
+### 3.4 Install Grafana
+
+Install and start the Grafana visualization server.
+
+```bash
+sudo apt-get install -y apt-transport-https software-properties-common wget
+
+wget -q -O - https://packages.grafana.com/gpg.key | gpg --dearmor | sudo tee /usr/share/keyrings/grafana.gpg > /dev/null
+
+echo "deb [signed-by=/usr/share/keyrings/grafana.gpg] https://packages.grafana.com/oss/deb stable main" | sudo tee -a /etc/apt/sources.list.d/grafana.list
+
+sudo apt-get update
+sudo apt-get install -y grafana
+
+
+sudo systemctl enable grafana-server
+sudo systemctl start grafana-server
+sudo systemctl status grafana-server
+```
+
+<img width="1919" height="694" alt="image" src="https://github.com/user-attachments/assets/46d4eede-00ed-4626-befc-7949f8e3e2d0" />
+<img width="1918" height="599" alt="image" src="https://github.com/user-attachments/assets/cddb2986-1ce2-48e4-8572-e95f8e40cbcb" />
+
+## Grafana Login
+
+Open the following URL in your browser:
+
+```text
+http://<EC2-PUBLIC-IP>:3000
+```
+
+Example:
+
+```text
+http://54.160.238.4:3000
+```
+
+<img width="1919" height="966" alt="image" src="https://github.com/user-attachments/assets/7f38feae-7447-4b27-beb0-912c9d4de2f8" />
+
+### 3.5 Import Dashboard
 
 1. Open your Grafana console (port 3000).
 2. Go to **Connections -> Data Sources** -> **Add data source** -> Select **Loki**.
