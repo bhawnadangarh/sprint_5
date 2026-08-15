@@ -139,3 +139,44 @@ Grafana
 ```
 
 Successful hone ke baad same architecture **Attendance, Employee aur Notification APIs** par implement karo.
+
+
+                 OTMS
+                   |
+      ┌────────────┼────────────┐
+      ↓            ↓            ↓
+    Infra       Database      Redis
+      |            |            |
+ Node Exporter  DB Exporter  Redis Exporter
+      |            |            |
+      └────────────┼────────────┘
+                   ↓
+               Prometheus
+                   ↓
+                Grafana
+                   ↓
+              Alertmanager
+
+
+              APPLICATIONS
+                   |
+            OpenTelemetry
+                   |
+            OTel Collector
+              /         \
+             ↓           ↓
+          Metrics      Traces
+             |           |
+        Prometheus      Tempo
+             \           /
+              \         /
+                Grafana
+
+
+               APPLICATION LOGS
+                     |
+                 Alloy
+                     |
+                   Loki
+                     |
+                  Grafana
