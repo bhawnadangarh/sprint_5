@@ -1,6 +1,6 @@
 # POC – Application Logs Monitoring
 
-<img width="300" height="300" alt="logs monitoring" src="https://github.com/user-attachments/assets/8b79c592-daaa-44cd-8150-1e51b1adff74" />
+<img width="400" height="400" alt="image" src="https://github.com/user-attachments/assets/2a70024a-507e-4065-9660-ef729b724294" />
 
 ---
 
