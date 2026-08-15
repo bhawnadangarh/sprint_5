@@ -54,6 +54,8 @@ Logs are parsed dynamically to generate metric counts (e.g. rate of `ERROR` logs
 Download the Loki binary and config, and launch it.
 
 ```bash
+sudo apt update
+sudo apt install -y unzip
 wget https://github.com/grafana/loki/releases/download/v2.9.4/loki-linux-amd64.zip
 unzip loki-linux-amd64.zip
 chmod +x loki-linux-amd64
