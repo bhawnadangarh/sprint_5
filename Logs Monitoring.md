@@ -60,15 +60,20 @@ wget https://github.com/grafana/loki/releases/download/v2.9.4/loki-linux-amd64.z
 unzip loki-linux-amd64.zip
 chmod +x loki-linux-amd64
 
-wget https://raw.githubusercontent.com/grafana/loki/master/cmd/loki/loki-local-config.yaml
+wget https://raw.githubusercontent.com/grafana/loki/v2.9.4/cmd/loki/loki-local-config.yaml
 ./loki-linux-amd64 -config.file=loki-local-config.yaml &
 ```
+
+<img width="1919" height="455" alt="image" src="https://github.com/user-attachments/assets/c276c9e3-7fe0-4e27-8250-8ebe2533d925" />
+<img width="1918" height="465" alt="image" src="https://github.com/user-attachments/assets/8dc87761-db8d-48d1-b431-1df2221ff370" />
 
 Verify Loki is listening on port 3100:
 
 ```bash
 curl http://localhost:3100/ready
 ```
+<img width="961" height="86" alt="image" src="https://github.com/user-attachments/assets/d2b3e315-0cfe-4854-9cda-d6d5780c5c5d" />
+
 
 ---
 
@@ -81,6 +86,7 @@ wget https://github.com/grafana/loki/releases/download/v2.9.4/promtail-linux-amd
 unzip promtail-linux-amd64.zip
 chmod +x promtail-linux-amd64
 ```
+<img width="1919" height="796" alt="image" src="https://github.com/user-attachments/assets/0a2c54d3-8da4-4b58-aaeb-57ac8468e97d" />
 
 Create `promtail-local-config.yaml` to tail the target application log file:
 
