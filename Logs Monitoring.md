@@ -134,7 +134,8 @@ echo "deb [signed-by=/usr/share/keyrings/grafana.gpg] https://packages.grafana.c
 sudo apt-get update
 sudo apt-get install -y grafana
 
-
+sudo systemctl enable grafana-server
+sudo systemctl start grafana-server
 sudo systemctl status grafana-server
 ```
 
